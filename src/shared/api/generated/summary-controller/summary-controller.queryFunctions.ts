@@ -7,7 +7,7 @@ import type {
 
 export const getSummaryList = (params?: ListParams, signal?: AbortSignal) => {
 	return apiClient<PageConsultationSummaryDto>({
-		url: `/api/summaries`,
+		url: `/summaries`,
 		method: "GET",
 		params: params as Record<string, string | number | boolean> | undefined,
 		signal,
@@ -16,7 +16,7 @@ export const getSummaryList = (params?: ListParams, signal?: AbortSignal) => {
 
 export const getSummaryDetail = (consultId: number, signal?: AbortSignal) => {
 	return apiClient<ConsultationSummaryDetailResponse>({
-		url: `/api/summaries/${consultId}`,
+		url: `/summaries/${consultId}`,
 		method: "GET",
 		signal,
 	});

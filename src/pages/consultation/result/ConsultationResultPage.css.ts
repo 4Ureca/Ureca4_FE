@@ -1,5 +1,32 @@
-import { style } from "@vanilla-extract/css";
+import { keyframes, style } from "@vanilla-extract/css";
 import { vars } from "../../../shared/design";
+
+/* ─── Keyframes (declared first — used throughout file) ─── */
+
+const panelSlideIn = keyframes({
+  from: { opacity: 0, transform: "translateX(-24px)" },
+  to:   { opacity: 1, transform: "translateX(0)" },
+});
+
+const panelSlideOut = keyframes({
+  from: { opacity: 1, transform: "translateX(0)" },
+  to:   { opacity: 0, transform: "translateX(-24px)" },
+});
+
+const contentSlideRight = keyframes({
+  from: { transform: "translateX(-120px)", opacity: 0.7 },
+  to:   { transform: "translateX(0)",      opacity: 1 },
+});
+
+const contentSlideLeft = keyframes({
+  from: { transform: "translateX(120px)",  opacity: 0.7 },
+  to:   { transform: "translateX(0)",      opacity: 1 },
+});
+
+const panelRowFadeIn = keyframes({
+  from: { opacity: 0, transform: "translateY(10px)" },
+  to:   { opacity: 1, transform: "translateY(0)" },
+});
 
 export const pageWrapper = style({
   flex: 1,
@@ -75,13 +102,36 @@ export const contentArea = style({
   gap: vars.spacing["4"],
 });
 
+export const contentGroup = style({
+  flex: 1,
+  minWidth: 0,
+  display: "flex",
+  gap: vars.spacing["6"],
+  alignItems: "flex-start",
+});
+
+export const contentGroupExpanded = style([contentGroup, {
+  animation: `${contentSlideRight} 300ms ease forwards`,
+}]);
+
+export const contentGroupClosing = style([contentGroup, {
+  animation: `${contentSlideLeft} 300ms ease forwards`,
+}]);
+
 /* ─── Progress Panel ─── */
 
-export const progressPanel = style({
+export const progressPanelWrapper = style({
   width: "220px",
   flexShrink: 0,
   position: "sticky",
   top: vars.spacing["6"],
+  display: "flex",
+  flexDirection: "column",
+  gap: vars.spacing["2"],
+});
+
+export const progressPanel = style({
+  width: "100%",
   backgroundColor: vars.color.surface,
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.lg,
@@ -183,6 +233,38 @@ export const chatBtn = style({
   transition: `all ${vars.transition.fast}`,
   selectors: {
     "&:hover": { backgroundColor: "#F3F4F6", color: vars.color.textPrimary },
+  },
+});
+
+export const manualBtn = style({
+  padding: `${vars.spacing["2"]} ${vars.spacing["3"]}`,
+  border: `1.5px solid #EAB308`,
+  borderRadius: vars.radius.md,
+  backgroundColor: "#FEFCE8",
+  color: "#713F12",
+  fontSize: vars.fontSize.xs,
+  fontWeight: vars.fontWeight.semibold,
+  cursor: "pointer",
+  textAlign: "center",
+  transition: `all ${vars.transition.fast}`,
+  selectors: {
+    "&:hover": { backgroundColor: "#FEF08A", borderColor: "#CA8A04" },
+  },
+});
+
+export const summaryFetchBtn = style({
+  padding: `${vars.spacing["2"]} ${vars.spacing["3"]}`,
+  border: `1.5px solid #EA580C`,
+  borderRadius: vars.radius.md,
+  backgroundColor: "#FFF7ED",
+  color: "#7C2D12",
+  fontSize: vars.fontSize.xs,
+  fontWeight: vars.fontWeight.semibold,
+  cursor: "pointer",
+  textAlign: "center",
+  transition: `all ${vars.transition.fast}`,
+  selectors: {
+    "&:hover": { backgroundColor: "#FED7AA", borderColor: "#C2410C" },
   },
 });
 
@@ -480,4 +562,427 @@ export const subItem = style({
   alignItems: "center",
   gap: "6px",
   fontSize: vars.fontSize.xs,
+});
+
+/* ─── Manual Card Layout ─── */
+
+export const bodyExpanded = style({
+  display: "flex",
+  gap: vars.spacing["6"],
+  padding: vars.spacing["6"],
+  paddingLeft: vars.spacing["8"],
+  paddingRight: vars.spacing["8"],
+  alignItems: "flex-start",
+  width: "100%",
+  boxSizing: "border-box",
+});
+
+const manualCardBase = {
+  flex: 1,
+  minWidth: "280px",
+  maxWidth: "420px",
+  alignSelf: "flex-start" as const,
+  position: "sticky" as const,
+  top: vars.spacing["6"],
+  display: "flex",
+  flexDirection: "column" as const,
+  gap: vars.spacing["5"],
+  paddingRight: vars.spacing["6"],
+  borderRight: `1.5px solid ${vars.color.border}`,
+};
+
+export const manualCardContainer = style({
+  ...manualCardBase,
+  animation: `${panelSlideIn} 280ms ease forwards`,
+});
+
+export const manualCardContainerClosing = style({
+  ...manualCardBase,
+  animation: `${panelSlideOut} 280ms ease forwards`,
+  pointerEvents: "none",
+});
+
+/* ─── Manual Panel Inner (카드 형태) ─── */
+
+export const manualPanelInner = style({
+  backgroundColor: "#FFFBEB",
+  border: `1.5px solid #EAB308`,
+  borderRadius: vars.radius.lg,
+  overflow: "hidden",
+  boxShadow: "0 2px 8px rgba(234,179,8,0.15)",
+  display: "flex",
+  flexDirection: "column",
+  maxHeight: "calc(100vh - 160px)",
+});
+
+export const manualPanelHeader = style({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: vars.spacing["2"],
+  padding: `${vars.spacing["4"]} ${vars.spacing["5"]}`,
+  borderBottom: `1px solid #FDE047`,
+  backgroundColor: "#FEF9C3",
+  flexShrink: 0,
+});
+
+/* 주황 계열 카드 — 상담 요약 상세 */
+export const summaryDetailCard = style({
+  backgroundColor: "#FFF7ED",
+  border: `1.5px solid #EA580C`,
+  borderRadius: vars.radius.lg,
+  overflow: "hidden",
+  boxShadow: "0 2px 8px rgba(234,88,12,0.15)",
+  display: "flex",
+  flexDirection: "column",
+  animation: `${panelSlideIn} 280ms ease forwards`,
+});
+
+export const summaryDetailHeader = style({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: vars.spacing["2"],
+  padding: `${vars.spacing["4"]} ${vars.spacing["5"]}`,
+  borderBottom: `1px solid #FDBA74`,
+  backgroundColor: "#FFEDD5",
+  flexShrink: 0,
+});
+
+export const manualPanelTitle = style({
+  fontSize: vars.fontSize.sm,
+  fontWeight: vars.fontWeight.bold,
+  color: vars.color.textPrimary,
+  flex: 1,
+});
+
+export const manualPanelCategory = style({
+  fontSize: vars.fontSize.xs,
+  color: vars.color.textSecondary,
+  backgroundColor: "#EFF6FF",
+  border: `1px solid #BFDBFE`,
+  borderRadius: vars.radius.full,
+  padding: `2px 8px`,
+  maxWidth: "120px",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+});
+
+export const manualPanelCloseBtn = style({
+  padding: `${vars.spacing["1"]} ${vars.spacing["3"]}`,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.sm,
+  backgroundColor: vars.color.surface,
+  color: vars.color.textSecondary,
+  fontSize: vars.fontSize.xs,
+  fontWeight: vars.fontWeight.medium,
+  cursor: "pointer",
+  flexShrink: 0,
+  selectors: {
+    "&:hover": { backgroundColor: "#F3F4F6", color: vars.color.textPrimary },
+  },
+});
+
+export const manualPanelBody = style({
+  flex: 1,
+  overflowY: "auto",
+  padding: vars.spacing["5"],
+  display: "flex",
+  flexDirection: "column",
+  gap: vars.spacing["3"],
+});
+
+export const manualPanelState = style({
+  fontSize: vars.fontSize.xs,
+  color: vars.color.textSecondary,
+  textAlign: "center",
+  padding: `${vars.spacing["8"]} 0`,
+});
+
+export const manualPanelList = style({
+  listStyle: "none",
+  margin: 0,
+  padding: 0,
+  display: "flex",
+  flexDirection: "column",
+  gap: vars.spacing["1"],
+});
+
+export const manualPanelItem = style({
+  backgroundColor: vars.color.surface,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.md,
+  overflow: "hidden",
+});
+
+export const manualPanelItemHeader = style({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: vars.spacing["2"],
+  padding: `${vars.spacing["3"]} ${vars.spacing["3"]}`,
+  background: "none",
+  border: "none",
+  width: "100%",
+  textAlign: "left",
+  cursor: "pointer",
+  selectors: {
+    "&:hover": { backgroundColor: "#F9FAFB" },
+  },
+});
+
+export const manualPanelItemTitle = style({
+  fontSize: vars.fontSize.xs,
+  fontWeight: vars.fontWeight.semibold,
+  color: vars.color.textPrimary,
+  flex: 1,
+  lineHeight: "1.4",
+});
+
+export const manualPanelChevron = style({
+  fontSize: "16px",
+  color: vars.color.textSecondary,
+  flexShrink: 0,
+  transition: `transform ${vars.transition.fast}`,
+});
+
+export const manualPanelItemBody = style({
+  padding: `0 ${vars.spacing["3"]} ${vars.spacing["3"]}`,
+  borderTop: `1px solid #F3F4F6`,
+});
+
+export const manualPanelItemContent = style({
+  fontSize: vars.fontSize.xs,
+  color: vars.color.textSecondary,
+  lineHeight: vars.lineHeight.relaxed,
+  margin: `${vars.spacing["2"]} 0 0`,
+  whiteSpace: "pre-wrap",
+});
+
+/* ─── Manual Button fade ─── */
+
+const fadeOut = keyframes({
+  from: { opacity: 1, maxHeight: "40px", paddingTop: "8px", paddingBottom: "8px" },
+  to:   { opacity: 0, maxHeight: 0,      paddingTop: 0,     paddingBottom: 0 },
+});
+
+const fadeIn = keyframes({
+  from: { opacity: 0, maxHeight: 0,      paddingTop: 0,     paddingBottom: 0 },
+  to:   { opacity: 1, maxHeight: "40px", paddingTop: "8px", paddingBottom: "8px" },
+});
+
+export const manualBtnHiding = style({
+  overflow: "hidden",
+  animation: `${fadeOut} 200ms ease forwards`,
+  pointerEvents: "none",
+});
+
+export const manualBtnShowing = style({
+  overflow: "hidden",
+  animation: `${fadeIn} 200ms ease forwards`,
+});
+
+/* ─── Bookmark Panels Row ─── */
+
+export const bookmarkPanelsRow = style({
+  display: "flex",
+  gap: vars.spacing["4"],
+  padding: vars.spacing["6"],
+  paddingLeft: vars.spacing["8"],
+  paddingRight: vars.spacing["8"],
+  paddingTop: 0,
+  width: "100%",
+  boxSizing: "border-box",
+  animation: `${panelRowFadeIn} 300ms ease forwards`,
+});
+
+export const bookmarkPanel = style({
+  backgroundColor: vars.color.surface,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.lg,
+  boxShadow: vars.shadow.sm,
+  overflow: "hidden",
+  display: "flex",
+  flexDirection: "column",
+  maxHeight: "180px",
+});
+
+export const bookmarkPanelHeader = style({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  padding: `${vars.spacing["3"]} ${vars.spacing["4"]}`,
+  borderBottom: `1px solid ${vars.color.border}`,
+  backgroundColor: "#FAFAFA",
+  flexShrink: 0,
+});
+
+export const bookmarkPanelTitle = style({
+  fontSize: vars.fontSize.xs,
+  fontWeight: vars.fontWeight.bold,
+  color: vars.color.textPrimary,
+  margin: 0,
+  letterSpacing: "0.04em",
+});
+
+export const bookmarkPanelLarge = style({
+  backgroundColor: vars.color.surface,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.lg,
+  boxShadow: vars.shadow.sm,
+  overflow: "hidden",
+  display: "flex",
+  flexDirection: "column",
+  maxHeight: "170px",
+});
+
+export const bookmarkPanelBody = style({
+  flex: 1,
+  overflowY: "auto",
+  padding: vars.spacing["3"],
+  display: "flex",
+  flexDirection: "column",
+  gap: vars.spacing["1"],
+});
+
+export const searchRow = style({
+  display: "flex",
+  gap: vars.spacing["1"],
+  padding: `${vars.spacing["2"]} ${vars.spacing["3"]}`,
+  borderBottom: `1px solid ${vars.color.border}`,
+  flexShrink: 0,
+});
+
+export const searchInput = style({
+  flex: 1,
+  padding: `${vars.spacing["1"]} ${vars.spacing["2"]}`,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.sm,
+  fontSize: vars.fontSize.xs,
+  color: vars.color.textPrimary,
+  backgroundColor: vars.color.surface,
+  outline: "none",
+  selectors: {
+    "&:focus": { borderColor: vars.color.borderFocus },
+  },
+});
+
+export const searchSubmitBtn = style({
+  padding: `${vars.spacing["1"]} ${vars.spacing["2"]}`,
+  border: `1px solid ${vars.color.primary}`,
+  borderRadius: vars.radius.sm,
+  backgroundColor: vars.color.primary,
+  color: "#FFFFFF",
+  fontSize: vars.fontSize.xs,
+  fontWeight: vars.fontWeight.semibold,
+  cursor: "pointer",
+  flexShrink: 0,
+  selectors: {
+    "&:hover": { backgroundColor: vars.color.primaryHover },
+  },
+});
+
+export const bookmarkPanelEmpty = style({
+  fontSize: vars.fontSize.xs,
+  color: vars.color.textSecondary,
+  textAlign: "center",
+  padding: `${vars.spacing["6"]} 0`,
+});
+
+export const bookmarkPanelItem = style({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: vars.spacing["2"],
+  padding: `${vars.spacing["2"]} ${vars.spacing["3"]}`,
+  borderRadius: vars.radius.sm,
+  border: `1px solid ${vars.color.border}`,
+  backgroundColor: vars.color.surface,
+  cursor: "pointer",
+  textAlign: "left",
+  width: "100%",
+  selectors: {
+    "&:hover": { backgroundColor: "#F9FAFB", borderColor: vars.color.primary },
+  },
+});
+
+export const bookmarkPanelItemText = style({
+  fontSize: vars.fontSize.xs,
+  color: vars.color.textPrimary,
+  fontWeight: vars.fontWeight.medium,
+  flex: 1,
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+});
+
+export const bookmarkPanelItemMeta = style({
+  fontSize: vars.fontSize.xs,
+  color: vars.color.textSecondary,
+  flexShrink: 0,
+});
+
+/* ─── Progress Panel Expanded (bookmark panels inline) ─── */
+
+export const progressPanelWrapperExpanded = style({
+  width: "600px",
+  flexShrink: 0,
+  position: "sticky",
+  top: vars.spacing["6"],
+  alignSelf: "flex-start",
+  display: "flex",
+  flexDirection: "column",
+  gap: vars.spacing["2"],
+});
+
+export const progressPanelNarrow = style({
+  width: "220px",
+  alignSelf: "flex-end",
+  display: "flex",
+  flexDirection: "column",
+  gap: vars.spacing["2"],
+});
+
+export const bookmarkPanelsRowInline = style({
+  display: "flex",
+  flexDirection: "column",
+  gap: vars.spacing["2"],
+  animation: `${panelRowFadeIn} 300ms ease forwards`,
+});
+
+/* ─── Bookmark Detail Card ─── */
+
+export const bookmarkDetailCard = style({
+  backgroundColor: "#FFF7ED",
+  border: `1.5px solid #EA580C`,
+  borderRadius: vars.radius.lg,
+  overflow: "hidden",
+  boxShadow: "0 2px 8px rgba(234,88,12,0.15)",
+  display: "flex",
+  flexDirection: "column",
+  animation: `${panelSlideIn} 280ms ease forwards`,
+});
+
+export const bookmarkDetailBody = style({
+  padding: vars.spacing["4"],
+  display: "flex",
+  flexDirection: "column",
+  gap: vars.spacing["3"],
+  overflowY: "auto",
+  maxHeight: "260px",
+});
+
+export const bookmarkDetailLabel = style({
+  fontSize: vars.fontSize.xs,
+  fontWeight: vars.fontWeight.semibold,
+  color: vars.color.textSecondary,
+  marginBottom: "4px",
+});
+
+export const bookmarkDetailValue = style({
+  fontSize: vars.fontSize.xs,
+  color: vars.color.textPrimary,
+  lineHeight: vars.lineHeight.relaxed,
+  whiteSpace: "pre-wrap",
 });
