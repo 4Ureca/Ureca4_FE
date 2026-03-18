@@ -4,7 +4,7 @@ import { BaseModal } from "../../../shared/ui/BaseModal/BaseModal";
 import { Button } from "../../../shared/ui/Button/Button";
 import * as ms from "../../consultation/list/ConsultationDetailModal.css";
 import { EMPLOYEE_DEPARTMENTS, EMPLOYEE_JOB_ROLES } from "./employeeConstants";
-import { EmployeeField, EmployeeStatusSwitch } from "./employeeShared";
+import { EmployeeField } from "./employeeShared";
 
 interface Props {
 	onClose: () => void;
@@ -23,7 +23,6 @@ export function EmployeeFormModal({ onClose, onSuccess }: Props) {
 	const [deptId, setDeptId] = useState("");
 	const [jobRoleId, setJobRoleId] = useState("");
 	const [joinedAt, setJoinedAt] = useState("");
-	const [isActive, setIsActive] = useState(true);
 	const [errorMsg, setErrorMsg] = useState("");
 
 	const mutation = useMutationPostEmployeeQuery();
@@ -55,7 +54,6 @@ export function EmployeeFormModal({ onClose, onSuccess }: Props) {
 					deptId: deptId ? Number(deptId) : undefined,
 					jobRoleId: jobRoleId ? Number(jobRoleId) : undefined,
 					joinedAt: joinedAt || undefined,
-					...( { isActive } as { isActive: boolean } ),
 				},
 			},
 			{
@@ -205,9 +203,6 @@ export function EmployeeFormModal({ onClose, onSuccess }: Props) {
 							value={joinedAt}
 							onChange={(e) => setJoinedAt(e.target.value)}
 						/>
-					</EmployeeField>
-					<EmployeeField label="계정 활성화 여부">
-						<EmployeeStatusSwitch checked={isActive} onToggle={() => setIsActive((current) => !current)} disabled={mutation.isPending} />
 					</EmployeeField>
 				</div>
 				{errorMsg && (
