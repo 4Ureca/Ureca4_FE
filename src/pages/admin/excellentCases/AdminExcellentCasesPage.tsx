@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useQueryClient } from "@tanstack/react-query";
 import Select from "react-select";
 import { useGetCandidatesQuery, useMutationPatchRejectExcellentCaseQuery } from "../../../shared/api/generated/admin-excellent-case";
 import {
@@ -207,7 +207,7 @@ export function AdminExcellentCasesPage() {
   const PAGE_SIZE = 20;
 
   // ─── API 호출 ───
-  const { data, isPending, isError } = useGetCandidatesQuery({
+  const { data, isPending, isError, isFetching } = useGetCandidatesQuery({
     status: statusParam,
     sortBy: sortBy || undefined,
     direction,
@@ -215,7 +215,7 @@ export function AdminExcellentCasesPage() {
     page: hasClientFilter ? 0 : page - 1,
     year: yearWeek.year,
     week: yearWeek.week,
-  });
+  }, { query: { placeholderData: keepPreviousData } });
 
   const { data: countAll } = useGetCandidatesQuery({ status: GetCandidatesStatus.ALL, size: 1, page: 0, year: yearWeek.year, week: yearWeek.week });
   const { data: countPending } = useGetCandidatesQuery({ status: GetCandidatesStatus.PENDING, size: 1, page: 0, year: yearWeek.year, week: yearWeek.week });
@@ -428,7 +428,7 @@ export function AdminExcellentCasesPage() {
           {isError && <p className={s.stateText}>데이터를 불러오지 못했습니다.</p>}
 
           {!isPending && !isError && (
-            <div className={s.tableWrap}>
+            <div className={s.tableWrap} style={isFetching ? { opacity: 0.6, pointerEvents: "none", transition: "opacity 0.15s" } : { transition: "opacity 0.15s" }}>
               <div className={s.tableScroll}>
                 <table className={s.table}>
                   <thead className={s.thead}>
