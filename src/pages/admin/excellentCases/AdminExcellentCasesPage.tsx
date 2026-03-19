@@ -52,13 +52,13 @@ function extractSituationTitle(title?: string): string {
 }
 
 const STATUS_LABEL: Record<string, string> = {
-  PENDING:  "후보군",
+  PENDING: "후보군",
   SELECTED: "이달의 사례로 게시중",
   REJECTED: "후보군 제외",
 };
 
 const STATUS_BADGE_STYLE: Record<string, React.CSSProperties> = {
-  PENDING:  { backgroundColor: "#FEF3C7", color: "#92400E" },
+  PENDING: { backgroundColor: "#FEF3C7", color: "#92400E" },
   SELECTED: { backgroundColor: "#DCFCE7", color: "#166534" },
   REJECTED: { backgroundColor: "#FEF2F2", color: "#991B1B" },
 };
@@ -74,18 +74,19 @@ interface RowProps {
 function CandidateRow({ item, onRowClick, onSelectClick, onRejectClick, isRejecting }: RowProps) {
   const status = item.selectionStatus ?? EvaluationListResponseSelectionStatus.PENDING;
 
-  const canSelect = status === EvaluationListResponseSelectionStatus.PENDING;
+  // 🥊 90점 이상인 경우에만 선정 버튼 노출 (PENDING 또는 REJECTED 상태일 때)
+  const canSelect = (status === EvaluationListResponseSelectionStatus.PENDING
+    || status === EvaluationListResponseSelectionStatus.REJECTED)
+    && (item.score ?? 0) >= 90;
+    
   const canReject = status === EvaluationListResponseSelectionStatus.PENDING
     || status === EvaluationListResponseSelectionStatus.SELECTED;
 
   return (
-    <tr onClick={onRowClick}>
-      {/* 카테고리 */}
+    <tr onClick={onRowClick} className={s.tr}>
       <td className={s.td}>
         <span className={s.categoryPill}>{item.categoryName ?? "기타"}</span>
       </td>
-
-      {/* 제목 */}
       <td className={s.td}>
         <div className={s.titleCell}>
           <div className={s.titleText}>
@@ -93,13 +94,9 @@ function CandidateRow({ item, onRowClick, onSelectClick, onRejectClick, isReject
           </div>
         </div>
       </td>
-
-      {/* 상담사 */}
       <td className={s.td}>
         <span style={{ fontSize: "13px", color: "#374151" }}>{item.counselorName ?? "-"}</span>
       </td>
-
-      {/* AI 점수 */}
       <td className={s.tdCenter}>
         <div
           className={s.scoreBadge}
@@ -108,8 +105,6 @@ function CandidateRow({ item, onRowClick, onSelectClick, onRejectClick, isReject
           {item.score ?? "-"}
         </div>
       </td>
-
-      {/* 상태 */}
       <td className={s.td}>
         <span style={{
           display: "inline-flex",
@@ -122,13 +117,9 @@ function CandidateRow({ item, onRowClick, onSelectClick, onRejectClick, isReject
           {STATUS_LABEL[status]}
         </span>
       </td>
-
-      {/* 등록일 */}
       <td className={s.td}>
         <span className={s.dateText}>{formatDate(item.createdAt)}</span>
       </td>
-
-      {/* 관리 */}
       <td className={s.tdCenter} onClick={(e) => e.stopPropagation()}>
         <div className={s.actionCell}>
           {canSelect && (
@@ -166,25 +157,40 @@ function getCurrentISOWeek() {
 }
 
 export function AdminExcellentCasesPage() {
-  const [activeFilter, setActiveFilter]     = useState<FilterStatus>("ALL");
-  const [keyword, setKeyword]               = useState("");
+  const [activeFilter, setActiveFilter] = useState<FilterStatus>("ALL");
+  const [keyword, setKeyword] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
-  const [agentFilter, setAgentFilter]       = useState("");
-  const [sortBy, setSortBy]                 = useState("");
-  const [direction, setDirection]           = useState<typeof GetCandidatesDirection[keyof typeof GetCandidatesDirection]>(GetCandidatesDirection.desc);
-  const [modalState, setModalState]         = useState<DetailModalState | null>(null);
-  const [rejectingId, setRejectingId]       = useState<number | null>(null);
-  const [page, setPage]                     = useState(1);
-  const [yearWeek, setYearWeek]             = useState(getCurrentISOWeek);
+  const [agentFilter, setAgentFilter] = useState("");
+  const [sortBy, setSortBy] = useState("");
+  const [direction, setDirection] = useState<typeof GetCandidatesDirection[keyof typeof GetCandidatesDirection]>(GetCandidatesDirection.desc);
+  const [modalState, setModalState] = useState<DetailModalState | null>(null);
+  const [rejectingId, setRejectingId] = useState<number | null>(null);
+  const [page, setPage] = useState(1);
+  const [yearWeek, setYearWeek] = useState(getCurrentISOWeek);
 
-  useEffect(() => { setPage(1); }, [activeFilter, sortBy, direction, yearWeek]);
+  // 🥊 [수정 포인트] 필터 변경 시 동작 정의
+  useEffect(() => {
+    setPage(1);
+    // 후보군 제외 탭을 클릭했을 때만 기본을 '점수순(score)' & '내림차순(desc)'으로 설정
+    if (activeFilter === "REJECTED") {
+      setSortBy("score");
+      setDirection(GetCandidatesDirection.desc);
+    } else {
+      // 다른 탭으로 돌아올 때는 최신순으로 복구 (원치 않으시면 이 else문은 지우셔도 됩니다)
+      setSortBy("");
+      setDirection(GetCandidatesDirection.desc);
+    }
+  }, [activeFilter]);
+
+  // 페이지 외의 정렬 값이 바뀌었을 때 페이지만 초기화
+  useEffect(() => { setPage(1); }, [sortBy, direction, yearWeek]);
 
   const queryClient = useQueryClient();
 
-  const statusParam = activeFilter === "ALL"      ? GetCandidatesStatus.ALL      :
-                      activeFilter === "PENDING"  ? GetCandidatesStatus.PENDING  :
-                      activeFilter === "SELECTED" ? GetCandidatesStatus.SELECTED :
-                      GetCandidatesStatus.REJECTED;
+  const statusParam = activeFilter === "ALL" ? GetCandidatesStatus.ALL :
+    activeFilter === "PENDING" ? GetCandidatesStatus.PENDING :
+    activeFilter === "SELECTED" ? GetCandidatesStatus.SELECTED :
+    GetCandidatesStatus.REJECTED;
 
   function navigateWeek(delta: number) {
     setYearWeek(prev => {
@@ -210,71 +216,66 @@ export function AdminExcellentCasesPage() {
     year: yearWeek.year,
     week: yearWeek.week,
   });
-  const { data: countAll }      = useGetCandidatesQuery({ status: GetCandidatesStatus.ALL,      size: 1, page: 0, year: yearWeek.year, week: yearWeek.week });
-  const { data: countPending }  = useGetCandidatesQuery({ status: GetCandidatesStatus.PENDING,  size: 1, page: 0, year: yearWeek.year, week: yearWeek.week });
+
+  const { data: countAll } = useGetCandidatesQuery({ status: GetCandidatesStatus.ALL, size: 1, page: 0, year: yearWeek.year, week: yearWeek.week });
+  const { data: countPending } = useGetCandidatesQuery({ status: GetCandidatesStatus.PENDING, size: 1, page: 0, year: yearWeek.year, week: yearWeek.week });
   const { data: countSelected } = useGetCandidatesQuery({ status: GetCandidatesStatus.SELECTED, size: 1, page: 0, year: yearWeek.year, week: yearWeek.week });
   const { data: countRejected } = useGetCandidatesQuery({ status: GetCandidatesStatus.REJECTED, size: 1, page: 0, year: yearWeek.year, week: yearWeek.week });
+  
   const { data: categoryData } = useGetCategoriesQuery();
-  const { data: agentData }    = useGetAgentsQuery();
+  const { data: agentData } = useGetAgentsQuery();
+
+  const forceGlobalApiRefetch = async (message: string) => {
+    await queryClient.resetQueries({ queryKey: ["admin-excellent-case"] });
+    await queryClient.resetQueries({ queryKey: ["/admin/excellent-cases/candidates"] });
+    await queryClient.refetchQueries({ type: "active" });
+    alert(message);
+    setRejectingId(null);
+  };
 
   const rejectMutation = useMutationPatchRejectExcellentCaseQuery({
     mutation: {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["/admin/excellent-cases/candidates"] });
-        setRejectingId(null);
+      onSuccess: () => forceGlobalApiRefetch("후보군에서 제외되었습니다."),
+      onError: (error: any) => {
+        if (error.response?.status === 200 || error.name === 'SyntaxError') {
+          forceGlobalApiRefetch("후보군에서 제외되었습니다.");
+        } else {
+          alert("제외 처리 중 오류가 발생했습니다.");
+          setRejectingId(null);
+        }
       },
-      onError: () => setRejectingId(null),
     },
   });
 
   const allItems = data?.content ?? [];
-
-  const uniqueSmallCategories = Array.from(
-    new Map(
-      (categoryData ?? [])
-        .filter(c => c.smallCategory)
-        .map(c => [c.smallCategory, c])
-    ).values()
-  );
-
+  const uniqueSmallCategories = Array.from(new Map((categoryData ?? []).filter(c => c.smallCategory).map(c => [c.smallCategory, c])).values());
   const agents = agentData ?? [];
 
   const filteredItems = allItems
     .filter(i => categoryFilter ? i.categoryName === categoryFilter : true)
-    .filter(i => agentFilter    ? i.counselorName === agentFilter   : true)
+    .filter(i => agentFilter ? i.counselorName === agentFilter : true)
     .filter(i => {
       if (!keyword.trim()) return true;
       const kw = keyword.trim().toLowerCase();
-      return (
-        (i.title?.toLowerCase().includes(kw)         ?? false) ||
-        (i.counselorName?.toLowerCase().includes(kw) ?? false)
-      );
+      return (i.title?.toLowerCase().includes(kw) ?? false) || (i.counselorName?.toLowerCase().includes(kw) ?? false);
     });
 
-  const totalPages = hasClientFilter
-    ? Math.max(1, Math.ceil(filteredItems.length / PAGE_SIZE))
-    : (data?.totalPages ?? 1);
-  const pagedItems = hasClientFilter
-    ? filteredItems.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
-    : filteredItems;
+  const totalPages = hasClientFilter ? Math.max(1, Math.ceil(filteredItems.length / PAGE_SIZE)) : (data?.totalPages ?? 1);
+  const pagedItems = hasClientFilter ? filteredItems.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE) : filteredItems;
 
-  const STAT_BOXES: {
-    key: FilterStatus;
-    label: string;
-    count: number;
-    countColor: string;
-    boxClass: string;
-  }[] = [
-    { key: "ALL",      label: "전체 사례",           count: countAll?.totalElements      ?? 0, countColor: "#0F172A", boxClass: s.statBoxAll      },
-    { key: "PENDING",  label: "AI선정 후보군",        count: countPending?.totalElements  ?? 0, countColor: "#D97706", boxClass: s.statBoxPending  },
+  const STAT_BOXES: { key: FilterStatus; label: string; count: number; countColor: string; boxClass: string; }[] = [
+    { key: "ALL", label: "전체 사례", count: countAll?.totalElements ?? 0, countColor: "#0F172A", boxClass: s.statBoxAll },
+    { key: "PENDING", label: "AI선정 후보군", count: countPending?.totalElements ?? 0, countColor: "#D97706", boxClass: s.statBoxPending },
     { key: "SELECTED", label: "이달의 사례로 게시중", count: countSelected?.totalElements ?? 0, countColor: "#059669", boxClass: s.statBoxSelected },
-    { key: "REJECTED", label: "후보군 제외",          count: countRejected?.totalElements ?? 0, countColor: "#DC2626", boxClass: s.statBoxRejected },
+    { key: "REJECTED", label: "후보군 제외", count: countRejected?.totalElements ?? 0, countColor: "#DC2626", boxClass: s.statBoxRejected },
   ];
 
   function handleReject(e: React.MouseEvent, consultId: number) {
     e.stopPropagation();
-    setRejectingId(consultId);
-    rejectMutation.mutate({ consultId });
+    if (window.confirm("선택한 사례를 정말 후보군에서 제외하시겠습니까?")) {
+      setRejectingId(consultId);
+      rejectMutation.mutate({ consultId });
+    }
   }
 
   return (
@@ -299,7 +300,6 @@ export function AdminExcellentCasesPage() {
         </div>
 
         <div className={s.content}>
-          {/* ─── Stat Box Filter ─── */}
           <div className={s.statBoxGrid}>
             {STAT_BOXES.map(({ key, label, count, countColor, boxClass }) => (
               <button
@@ -317,7 +317,6 @@ export function AdminExcellentCasesPage() {
             ))}
           </div>
 
-          {/* ─── Toolbar ─── */}
           <div className={s.toolbar}>
             <div className={s.toolbarLeft}>
               <div className={s.searchWrap}>
@@ -359,7 +358,11 @@ export function AdminExcellentCasesPage() {
                   placeholder: (base) => ({ ...base, color: "#6B7280", fontSize: "14px" }),
                   singleValue: (base) => ({ ...base, color: "#374151", fontSize: "14px" }),
                   menu: (base) => ({ ...base, borderRadius: "8px", border: "1px solid #D1D5DB", boxShadow: "0 4px 6px rgba(0,0,0,0.07)", zIndex: 50 }),
-                  option: (base, state) => ({ ...base, fontSize: "14px", backgroundColor: state.isSelected ? "#E1006A" : state.isFocused ? "#F9FAFB" : "#FFFFFF", color: state.isSelected ? "#FFFFFF" : "#111827", cursor: "pointer" }),
+                  option: (base, state) => ({ 
+                    ...base, fontSize: "14px", cursor: "pointer",
+                    backgroundColor: state.isSelected ? "#E1006A" : state.isFocused ? "#F9FAFB" : "#FFFFFF",
+                    color: state.isSelected ? "#FFFFFF" : "#111827"
+                  }),
                   indicatorSeparator: () => ({ display: "none" }),
                   dropdownIndicator: (base) => ({ ...base, padding: "0 6px", color: "#6B7280" }),
                   clearIndicator: (base) => ({ ...base, padding: "0 4px", color: "#6B7280" }),
@@ -392,7 +395,11 @@ export function AdminExcellentCasesPage() {
                   placeholder: (base) => ({ ...base, color: "#6B7280", fontSize: "14px" }),
                   singleValue: (base) => ({ ...base, color: "#374151", fontSize: "14px" }),
                   menu: (base) => ({ ...base, borderRadius: "8px", border: "1px solid #D1D5DB", boxShadow: "0 4px 6px rgba(0,0,0,0.07)", zIndex: 50 }),
-                  option: (base, state) => ({ ...base, fontSize: "14px", backgroundColor: state.isSelected ? "#E1006A" : state.isFocused ? "#F9FAFB" : "#FFFFFF", color: state.isSelected ? "#FFFFFF" : "#111827", cursor: "pointer" }),
+                  option: (base, state) => ({ 
+                    ...base, fontSize: "14px", cursor: "pointer",
+                    backgroundColor: state.isSelected ? "#E1006A" : state.isFocused ? "#F9FAFB" : "#FFFFFF",
+                    color: state.isSelected ? "#FFFFFF" : "#111827"
+                  }),
                   indicatorSeparator: () => ({ display: "none" }),
                   dropdownIndicator: (base) => ({ ...base, padding: "0 6px", color: "#6B7280" }),
                   clearIndicator: (base) => ({ ...base, padding: "0 4px", color: "#6B7280" }),
@@ -408,7 +415,7 @@ export function AdminExcellentCasesPage() {
               <select
                 className={s.filterSelect}
                 value={direction}
-                onChange={(e) => setDirection(e.target.value as typeof direction)}
+                onChange={(e) => setDirection(e.target.value as any)}
               >
                 <option value={GetCandidatesDirection.desc}>내림차순</option>
                 <option value={GetCandidatesDirection.asc}>오름차순</option>
@@ -418,7 +425,7 @@ export function AdminExcellentCasesPage() {
 
           {/* ─── Table ─── */}
           {isPending && <p className={s.stateText}>불러오는 중...</p>}
-          {isError   && <p className={s.stateText}>데이터를 불러오지 못했습니다.</p>}
+          {isError && <p className={s.stateText}>데이터를 불러오지 못했습니다.</p>}
 
           {!isPending && !isError && (
             <div className={s.tableWrap}>
@@ -437,11 +444,7 @@ export function AdminExcellentCasesPage() {
                   </thead>
                   <tbody>
                     {pagedItems.length === 0 ? (
-                      <tr>
-                        <td className={s.td} colSpan={7} style={{ textAlign: "center", padding: "48px 0", color: "#94A3B8" }}>
-                          해당 조건의 후보 사례가 없습니다.
-                        </td>
-                      </tr>
+                      <tr><td className={s.td} colSpan={7} style={{ textAlign: "center", padding: "48px 0", color: "#94A3B8" }}>해당 조건의 후보 사례가 없습니다.</td></tr>
                     ) : (
                       pagedItems.map((item: EvaluationListResponse) => (
                         <CandidateRow
