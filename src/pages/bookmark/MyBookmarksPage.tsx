@@ -1,153 +1,91 @@
-import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import {
-  useGetConsultationBookmarkDetailQuery,
-  useGetConsultationBookmarksQuery,
-  useMutationDeleteConsultationBookmarkQuery,
-} from "../../shared/api/generated/bookmark";
-import { getConsultationBookmarksKey } from "../../shared/api/generated/bookmark/bookmark.keys";
+import { useGetConsultationBookmarksQuery, useGetManualBookmarksQuery } from "../../shared/api/generated/bookmark";
+import { getRole } from "../../shared/api/roleStore";
 import * as layout from "../../shared/ui/pageLayout.css";
+import { ConsultationDetailModal } from "../consultation/list/ConsultationDetailModal";
+import { SummaryDetailModal } from "../summary/SummaryDetailModal";
+import { DashboardSidebar } from "../../widgets/DashboardSidebar/DashboardSidebar";
+import { ConsultBookmarkList } from "./ConsultBookmarkList";
+import { ManualBookmarkDetailModal } from "./ManualBookmarkDetailModal";
+import { ManualBookmarkList } from "./ManualBookmarkList";
 import * as s from "./MyBookmarksPage.css";
 
-function formatDate(raw?: string) {
-  if (!raw) return "–";
-  const d = new Date(raw);
-  if (Number.isNaN(d.getTime())) return raw;
-  return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
-}
+type Tab = "consult" | "manual";
+const CLOSE_DELAY = 180;
 
-/* ─── 상세 패널 ─── */
+export function MyBookmarksPage() {
+  const [activeTab, setActiveTab] = useState<Tab>("consult");
+  const [summaryId, setSummaryId] = useState<number | null>(null);
+  const [isClosingSummary, setIsClosingSummary] = useState(false);
+  const [consultDetailId, setConsultDetailId] = useState<number | null>(null);
+  const [isClosingConsult, setIsClosingConsult] = useState(false);
+  const [detailManualId, setDetailManualId] = useState<number | null>(null);
 
-function DetailPanel({ consultId, onBack }: { consultId: number; onBack: () => void }) {
-  const { data, isPending, isError } = useGetConsultationBookmarkDetailQuery(consultId);
+  const { data: consultData } = useGetConsultationBookmarksQuery();
+  const { data: manualData } = useGetManualBookmarksQuery();
+
+  const consultCount = consultData?.data?.length ?? 0;
+  const manualCount = manualData?.data?.length ?? 0;
+
+  const handleCloseSummary = () => {
+    setIsClosingSummary(true);
+    setTimeout(() => { setSummaryId(null); setIsClosingSummary(false); }, CLOSE_DELAY);
+  };
+
+  const handleViewConsult = (id: number) => {
+    handleCloseSummary();
+    setTimeout(() => setConsultDetailId(id), CLOSE_DELAY + 50);
+  };
+
+  const handleCloseConsult = () => {
+    setIsClosingConsult(true);
+    setTimeout(() => { setConsultDetailId(null); setIsClosingConsult(false); }, CLOSE_DELAY);
+  };
 
   return (
     <>
-      <button type="button" className={s.backBtn} onClick={onBack}>← 목록으로</button>
-
-      {isPending && <p className={s.stateText}>불러오는 중...</p>}
-      {isError   && <p className={s.stateText}>불러오지 못했습니다.</p>}
-
-      {data?.data && (
-        <div className={s.detailPanel}>
-          <div className={s.detailRow}>
-            <span className={s.detailLabel}>상담번호</span>
-            <span className={s.detailValue}>#{data.data.consultId ?? "–"}</span>
-          </div>
-          <div className={s.detailRow}>
-            <span className={s.detailLabel}>상담일시</span>
-            <span className={s.detailValue}>{formatDate(data.data.consultationCreatedAt)}</span>
-          </div>
-          <div className={s.detailRow}>
-            <span className={s.detailLabel}>북마크일시</span>
-            <span className={s.detailValue}>{formatDate(data.data.bookmarkedAt)}</span>
-          </div>
-
-          {data.data.summary && (
-            <div>
-              <p className={s.sectionTitle}>요약</p>
-              <div className={s.summaryBox}>{data.data.summary}</div>
+      <DashboardSidebar isAdmin={getRole() === "관리자"} />
+      <main className={layout.main}>
+        <div className={s.pageWrapper}>
+          <div className={s.header}>
+            <div className={s.headerLeft}>
+              <h1 className={s.title}>내 북마크</h1>
+              <p className={s.subtitle}>내가 저장한 상담 요약과 매뉴얼 북마크</p>
             </div>
-          )}
+          </div>
 
-          {data.data.result && (
-            <div>
-              <p className={s.sectionTitle}>상담 결과</p>
-              <div className={s.resultBox}>{data.data.result}</div>
-            </div>
-          )}
+          <div className={s.tabBar}>
+            <button type="button" className={s.tab[activeTab === "consult" ? "active" : "inactive"]}
+              onClick={() => setActiveTab("consult")}>
+              상담 요약 ({consultCount})
+            </button>
+            <button type="button" className={s.tab[activeTab === "manual" ? "active" : "inactive"]}
+              onClick={() => setActiveTab("manual")}>
+              매뉴얼 ({manualCount})
+            </button>
+          </div>
+
+          <div className={s.content}>
+            {activeTab === "consult"
+              ? <ConsultBookmarkList onDetail={setSummaryId} />
+              : <ManualBookmarkList onDetail={setDetailManualId} />}
+          </div>
         </div>
+      </main>
+
+      {summaryId != null && (
+        <SummaryDetailModal consultId={summaryId}
+          onClose={handleCloseSummary} isClosing={isClosingSummary}
+          onViewConsult={handleViewConsult} />
+      )}
+      {consultDetailId != null && (
+        <ConsultationDetailModal consultId={consultDetailId}
+          onClose={handleCloseConsult} isClosing={isClosingConsult} />
+      )}
+      {detailManualId != null && (
+        <ManualBookmarkDetailModal manualId={detailManualId}
+          onClose={() => setDetailManualId(null)} />
       )}
     </>
-  );
-}
-
-/* ─── 목록 ─── */
-
-function BookmarkList({ onDetail }: { onDetail: (consultId: number) => void }) {
-  const qc = useQueryClient();
-  const { data, isPending, isError } = useGetConsultationBookmarksQuery();
-  const { mutate: deleteBookmark, isPending: isDeleting } = useMutationDeleteConsultationBookmarkQuery();
-
-  const items = data?.data ?? [];
-
-  const handleDelete = (consultId: number) => {
-    if (!confirm("북마크를 삭제하시겠습니까?")) return;
-    deleteBookmark(
-      { consultId },
-      { onSuccess: () => qc.invalidateQueries({ queryKey: getConsultationBookmarksKey() }) },
-    );
-  };
-
-  if (isPending)          return <p className={s.stateText}>불러오는 중...</p>;
-  if (isError)            return <p className={s.stateText}>데이터를 불러오지 못했습니다.</p>;
-  if (items.length === 0) return <p className={s.stateText}>북마크한 상담 요약이 없습니다.</p>;
-
-  return (
-    <div className={s.tableWrapper}>
-      <table className={s.table}>
-        <thead className={s.thead}>
-          <tr>
-            <th className={s.th}>상담번호</th>
-            <th className={s.th}>북마크 등록일</th>
-            <th className={s.th}>작업</th>
-          </tr>
-        </thead>
-        <tbody>
-          {items.map((item) => (
-            <tr key={item.bookmarkId} className={s.tr}>
-              <td className={s.td}>#{item.consultId ?? "–"}</td>
-              <td className={s.td}>{formatDate(item.createdAt)}</td>
-              <td className={s.td}>
-                <div className={s.btnGroup}>
-                  <button
-                    type="button"
-                    className={s.actionBtn}
-                    onClick={() => item.consultId != null && onDetail(item.consultId)}
-                  >
-                    상세보기
-                  </button>
-                  <button
-                    type="button"
-                    className={s.deleteBtn}
-                    onClick={() => item.consultId != null && handleDelete(item.consultId)}
-                    disabled={isDeleting}
-                  >
-                    삭제
-                  </button>
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-/* ─── 페이지 ─── */
-
-export function MyBookmarksPage() {
-  const [detailConsultId, setDetailConsultId] = useState<number | null>(null);
-  const { data } = useGetConsultationBookmarksQuery();
-  const total = data?.data?.length ?? 0;
-
-  return (
-    <main className={layout.main}>
-      <div className={s.pageWrapper}>
-        <div className={s.header}>
-          <h1 className={s.title}>내 북마크</h1>
-          <p className={s.subtitle}>내가 북마크한 상담 요약 목록</p>
-        </div>
-
-        <div className={s.content}>
-          {detailConsultId != null ? (
-            <DetailPanel consultId={detailConsultId} onBack={() => setDetailConsultId(null)} />
-          ) : (
-            <BookmarkList onDetail={setDetailConsultId} />
-          )}
-        </div>
-      </div>
-    </main>
   );
 }

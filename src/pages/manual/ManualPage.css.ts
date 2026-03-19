@@ -1,5 +1,10 @@
-import { style } from "@vanilla-extract/css";
+import { keyframes, style } from "@vanilla-extract/css";
 import { vars } from "../../shared/design";
+
+const fadeIn = keyframes({
+  from: { opacity: 0, transform: "translateY(6px)" },
+  to: { opacity: 1, transform: "translateY(0)" },
+});
 
 export const pageWrapper = style({
   display: "flex",
@@ -52,6 +57,7 @@ export const content = style({
   display: "flex",
   flexDirection: "column",
   gap: vars.spacing["4"],
+  animation: `${fadeIn} 0.35s ease`,
 });
 
 /* ─── Filter Bar ─── */
@@ -335,4 +341,94 @@ export const stateText = style({
   padding: `${vars.spacing["16"]} 0`,
   color: vars.color.textSecondary,
   fontSize: vars.fontSize.sm,
+});
+
+/* ─── Modal Detail ─── */
+
+export const modalDetailWrap = style({
+  display: "flex",
+  flexDirection: "column",
+  gap: vars.spacing["4"],
+});
+
+export const modalInfoGrid = style({
+  display: "grid",
+  gridTemplateColumns: "1fr 1fr",
+  gap: vars.spacing["3"],
+  padding: vars.spacing["4"],
+  backgroundColor: "#F9FAFB",
+  borderRadius: vars.radius.md,
+  border: `1px solid ${vars.color.border}`,
+});
+
+export const modalInfoItem = style({
+  display: "flex",
+  flexDirection: "column",
+  gap: "4px",
+});
+
+export const modalInfoLabel = style({
+  fontSize: vars.fontSize.xs,
+  color: vars.color.textSecondary,
+  fontWeight: vars.fontWeight.medium,
+});
+
+export const modalInfoValue = style({
+  fontSize: vars.fontSize.sm,
+  color: vars.color.textPrimary,
+  fontWeight: vars.fontWeight.medium,
+});
+
+export const activeBadge = style({
+  display: "inline-flex",
+  padding: `1px 6px`,
+  borderRadius: vars.radius.full,
+  fontSize: "10px",
+  fontWeight: vars.fontWeight.semibold,
+  backgroundColor: "#ECFDF5",
+  color: "#059669",
+  flexShrink: 0,
+});
+
+export const modalSection = style({
+  display: "flex",
+  flexDirection: "column",
+  gap: vars.spacing["2"],
+});
+
+export const modalSectionTitle = style({
+  fontSize: vars.fontSize.md,
+  fontWeight: vars.fontWeight.bold,
+  color: vars.color.textPrimary,
+  margin: 0,
+});
+
+export const modalContentBox = style({
+  padding: vars.spacing["4"],
+  backgroundColor: "#F9FAFB",
+  borderLeft: `3px solid ${vars.color.primary}`,
+  borderRadius: vars.radius.sm,
+  fontSize: vars.fontSize.sm,
+  color: vars.color.textPrimary,
+  lineHeight: vars.lineHeight.relaxed,
+  whiteSpace: "pre-wrap",
+});
+
+/* ─── Bookmark ─── */
+
+export const bookmarkBtn = style({
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  width: "28px",
+  height: "28px",
+  border: "none",
+  background: "none",
+  cursor: "pointer",
+  color: vars.color.textSecondary,
+  borderRadius: vars.radius.sm,
+  flexShrink: 0,
+  transition: `color ${vars.transition.fast}`,
+  ":hover": { color: "#F59E0B" },
+  ":disabled": { opacity: 0.4, cursor: "not-allowed" },
 });

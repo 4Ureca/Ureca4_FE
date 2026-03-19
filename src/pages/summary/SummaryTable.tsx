@@ -11,8 +11,13 @@ import { getRole } from "../../shared/api/roleStore";
 import * as s from "./SummaryPage.css";
 
 const CHANNEL_LABEL: Record<string, string> = {
-  call:     "전화 상담",
-  chatting: "채팅 상담",
+  CALL:     "CALL",
+  CHATTING: "CHATTING",
+};
+
+const CHANNEL_BADGE: Record<string, keyof typeof s.badgeVariant> = {
+  CALL:     "blue",
+  CHATTING: "purple",
 };
 
 function formatDate(raw?: string) {
@@ -59,6 +64,7 @@ function BookmarkCell({ consultId, bookmarkedIds }: BookmarkCellProps) {
       disabled={isPending}
       aria-label={isBookmarked ? "북마크 해제" : "북마크 추가"}
       title={isBookmarked ? "북마크 해제" : "북마크 추가"}
+      style={isBookmarked ? { color: "#F59E0B" } : undefined}
     >
       <svg
         width="15" height="15" viewBox="0 0 24 24"
@@ -124,7 +130,7 @@ export function SummaryTable({ items, onDetail }: Props) {
               <td className={s.td}>{item.customerName ?? "–"}</td>
               <td className={s.td}>
                 {item.channel
-                  ? <span className={s.badgeVariant.gray}>{CHANNEL_LABEL[item.channel] ?? item.channel}</span>
+                  ? <span className={s.badgeVariant[CHANNEL_BADGE[item.channel] ?? "gray"]}>{CHANNEL_LABEL[item.channel] ?? item.channel}</span>
                   : "–"}
               </td>
               <td className={s.td}>

@@ -1,5 +1,10 @@
-import { style } from "@vanilla-extract/css";
+import { keyframes, style } from "@vanilla-extract/css";
 import { vars } from "../../../shared/design";
+
+const fadeIn = keyframes({
+  from: { opacity: 0, transform: "translateY(6px)" },
+  to: { opacity: 1, transform: "translateY(0)" },
+});
 
 /* ─── Page Layout ─── */
 
@@ -117,6 +122,7 @@ export const content = style({
   display: "flex",
   flexDirection: "column",
   gap: vars.spacing["6"],
+  animation: `${fadeIn} 0.35s ease`,
 });
 
 /* ─── Section ─── */

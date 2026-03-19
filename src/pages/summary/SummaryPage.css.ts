@@ -40,6 +40,8 @@ export const badgeVariant = styleVariants({
   red:    [badgeBase, { backgroundColor: "#FEF2F2", color: "#DC2626" }],
   orange: [badgeBase, { backgroundColor: "#FFF7ED", color: "#EA580C" }],
   gray:   [badgeBase, { backgroundColor: "#F3F4F6", color: "#6B7280" }],
+  blue:   [badgeBase, { backgroundColor: "#EFF6FF", color: "#2563EB" }],
+  purple: [badgeBase, { backgroundColor: "#F5F3FF", color: "#7C3AED" }],
 });
 
 /* ─── Buttons ─── */
