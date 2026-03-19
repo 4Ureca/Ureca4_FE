@@ -2,6 +2,29 @@ import ky from "ky"
 
 import { getAccessToken, setAccessToken } from "./tokenStore"
 
+// 진행 중인 refresh 요청을 공유 — 동시 401이 여러 개 와도 한 번만 refresh
+let refreshingPromise: Promise<string> | null = null
+
+async function doRefresh(): Promise<string> {
+	if (refreshingPromise) return refreshingPromise
+
+	refreshingPromise = ky
+		.post(`${import.meta.env.VITE_API_BASE_URL}/auth/refresh`, {
+			credentials: "include",
+		})
+		.json<{ accessToken?: string }>()
+		.then((data) => {
+			if (!data.accessToken) throw new Error("no token in refresh response")
+			setAccessToken(data.accessToken)
+			return data.accessToken
+		})
+		.finally(() => {
+			refreshingPromise = null
+		})
+
+	return refreshingPromise
+}
+
 const kyInstance = ky.create({
 	prefixUrl: import.meta.env.VITE_API_BASE_URL,
 	credentials: "include",
@@ -18,7 +41,7 @@ const kyInstance = ky.create({
 			async (request, _options, response) => {
 				if (response.status !== 401) return response
 
-				// 인증 엔드포인트 자체가 401이면 토큰 갱신 시도하지 않음
+				// 인증 엔드포인트 자체가 401이면 갱신 시도하지 않음
 				if (
 					request.url.includes("/auth/refresh") ||
 					request.url.includes("/auth/login")
@@ -28,18 +51,15 @@ const kyInstance = ky.create({
 				}
 
 				try {
-					const data = await ky
-						.post(`${import.meta.env.VITE_API_BASE_URL}/auth/refresh`, {
-							credentials: "include",
-						})
-						.json<{ accessToken: string }>()
-
-					setAccessToken(data.accessToken)
-					request.headers.set("Authorization", `Bearer ${data.accessToken}`)
+					const newToken = await doRefresh()
+					request.headers.set("Authorization", `Bearer ${newToken}`)
 					return ky(request)
 				} catch {
 					setAccessToken(null)
-					window.location.href = "/login"
+					// SSR 환경에서는 window 없음
+					if (typeof window !== "undefined") {
+						window.location.href = "/login"
+					}
 				}
 			},
 		],

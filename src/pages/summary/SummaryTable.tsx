@@ -34,7 +34,7 @@ interface BookmarkCellProps {
 
 function BookmarkCell({ consultId, bookmarkedIds }: BookmarkCellProps) {
   const qc = useQueryClient();
-  const { mutate: addBookmark,    isPending: isAdding   } = useMutationPostConsultationBookmarkQuery();
+  const { mutate: addBookmark, isPending: isAdding } = useMutationPostConsultationBookmarkQuery();
   const { mutate: removeBookmark, isPending: isRemoving } = useMutationDeleteConsultationBookmarkQuery();
   const [optimistic, setOptimistic] = useState<boolean | null>(null);
 

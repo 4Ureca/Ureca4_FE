@@ -21,13 +21,56 @@ import { OutboundHeatmapSection } from "./OutboundHeatmapSection";
 import { OutboundKpiSection } from "./OutboundKpiSection";
 import { OutboundOptimalTimeSection } from "./OutboundOptimalTimeSection";
 
-const DEFAULT_DATE = "2026-01-02";
+function localDateStr(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function toApiDate(period: Period, raw: string): string {
+  if (period === "weekly") {
+    // "2026-W12" → 해당 주 월요일 yyyy-MM-dd
+    const match = raw.match(/^(\d{4})-W(\d{2})$/);
+    if (match) {
+      const d = new Date(Number(match[1]), 0, 1 + (Number(match[2]) - 1) * 7);
+      d.setDate(d.getDate() - (d.getDay() || 7) + 1);
+      return localDateStr(d);
+    }
+  }
+  if (period === "monthly") {
+    return raw.length === 7 ? `${raw}-01` : raw;
+  }
+  return raw;
+}
+
+function toInputValue(period: Period, apiDate: string): string {
+  if (period === "weekly") {
+    const d = new Date(apiDate);
+    d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+    const y = d.getFullYear();
+    const yearStart = new Date(y, 0, 1);
+    const w = Math.ceil((((d.valueOf() - yearStart.valueOf()) / 86400000) + 1) / 7);
+    return `${y}-W${String(w).padStart(2, "0")}`;
+  }
+  if (period === "monthly") return apiDate.slice(0, 7);
+  return apiDate;
+}
 
 export function OutboundPage() {
   const [period, setPeriod] = useState<Period>("daily");
-  const [date, setDate]     = useState(DEFAULT_DATE);
+  const [date, setDate]     = useState(() => localDateStr(new Date()));
 
   const params = { period, date };
+
+  function handlePeriodChange(p: Period) {
+    setPeriod(p);
+    setDate(toApiDate(p, toInputValue(p, date)));
+  }
+
+  function handleDateChange(raw: string) {
+    setDate(toApiDate(period, raw));
+  }
 
   const { data: kpi,         isPending: kpiPending     } = useGetKpiQuery(params);
   const { data: campaigns,   isPending: campPending     } = useGetCampaignsQuery(params);
@@ -46,7 +89,7 @@ export function OutboundPage() {
               <h1 className={rs.title}>아웃바운드 분석</h1>
               <p className={rs.subtitle}>기간별 아웃바운드 캠페인 성과 분석 (관리자 전용)</p>
             </div>
-            <PeriodSelector period={period} date={date} onPeriodChange={setPeriod} onDateChange={setDate} />
+            <PeriodSelector period={period} date={toInputValue(period, date)} onPeriodChange={handlePeriodChange} onDateChange={handleDateChange} />
           </div>
         </div>
         <div className={rs.body}>

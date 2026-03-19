@@ -6,63 +6,50 @@ import {
 	redirect,
 	Scripts,
 } from "@tanstack/react-router";
-import ky from "ky";
 
 import { Providers } from "../app/providers";
 import appCss from "../app/styles.css?url";
 import { getAccessToken, setAccessToken } from "../shared/api/tokenStore";
 import { ROUTES } from "../shared/config/routes";
 
-async function tryRestoreSession(currentPath: string) {
-	// 이미 로그인/oauth 페이지면 복원 시도 불필요
-	if (currentPath === ROUTES.LOGIN || currentPath.startsWith("/oauth")) return;
-
-	// SSR 환경에서는 브라우저 쿠키가 없으므로 클라이언트에서만 실행
-	if (typeof window === "undefined") return;
-
-	try {
-		const data = await ky
-			.post(`${import.meta.env.VITE_API_BASE_URL}/auth/refresh`, {
-				credentials: "include",
-			})
-			.json<{ accessToken: string }>();
-		setAccessToken(data.accessToken);
-	} catch {
-		// refresh 실패 = 세션 만료 → 로그인 페이지로
-		throw redirect({ to: ROUTES.LOGIN });
-	}
-}
-
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 	{
 		beforeLoad: async ({ location }) => {
-			if (!getAccessToken()) {
-				await tryRestoreSession(location.pathname);
+			// SSR 환경(서버)에서는 localStorage·쿠키에 접근 불가 → 클라이언트에서 처리
+			if (typeof window === "undefined") return;
+
+			const isAuthPath =
+				location.pathname === ROUTES.LOGIN ||
+				location.pathname.startsWith("/oauth");
+			if (isAuthPath) return;
+
+			// 토큰이 있으면 통과 (만료 여부는 afterResponse 401 hook이 처리)
+			if (getAccessToken()) return;
+
+			// 토큰이 없으면 httpOnly 쿠키의 refresh token으로 갱신 시도
+			try {
+				const baseUrl = import.meta.env.VITE_API_BASE_URL as string;
+				const res = await fetch(
+					`${baseUrl.replace(/\/$/, "")}/auth/refresh`,
+					{ method: "POST", credentials: "include" },
+				);
+				if (!res.ok) throw new Error("refresh failed");
+				const body = (await res.json()) as { accessToken?: string };
+				if (!body.accessToken) throw new Error("no token in response");
+				setAccessToken(body.accessToken);
+			} catch {
+				throw redirect({ to: ROUTES.LOGIN });
 			}
 		},
 		head: () => ({
 			meta: [
-				{
-					charSet: "utf-8",
-				},
-				{
-					name: "viewport",
-					content: "width=device-width, initial-scale=1",
-				},
-				{
-					title: "상담4조",
-				},
+				{ charSet: "utf-8" },
+				{ name: "viewport", content: "width=device-width, initial-scale=1" },
+				{ title: "상담4조" },
 			],
 			links: [
-				{
-					rel: "stylesheet",
-					href: appCss,
-				},
-				{
-					rel: "icon",
-					type: "image/svg+xml",
-					href: "/favicon.svg",
-				},
+				{ rel: "stylesheet", href: appCss },
+				{ rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
 			],
 		}),
 		component: RootComponent,
