@@ -1,4 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useGetMyInfoQuery, useMutationPostLogoutQuery } from "../../shared/api/generated/auth";
 import { clearRole } from "../../shared/api/roleStore";
@@ -9,6 +10,7 @@ import * as s from "./UserDropdown.css";
 
 export function UserDropdown() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
 
   const { data } = useGetMyInfoQuery();
@@ -18,6 +20,7 @@ export function UserDropdown() {
       onSuccess: () => {
         clearAllStorage();
         clearRole();
+        queryClient.clear();
         navigate({ to: ROUTES.LOGIN });
       },
     },
