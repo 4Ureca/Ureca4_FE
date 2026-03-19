@@ -1974,6 +1974,10 @@ channel?: string;
  */
 categoryCode?: string;
 /**
+ * 대분류 카테고리 (예: 부가서비스, 해지/재약정 등)
+ */
+categoryLarge?: string;
+/**
  * AI 요약 상태 (입력 가능 값: 요약완료, 요청중, 실패)
  */
 summaryStatus?: string;

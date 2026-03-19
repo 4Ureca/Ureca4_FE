@@ -42,12 +42,18 @@ export const content = style({
 
 export const filterBar = style({
   display: "flex",
-  alignItems: "center",
+  flexDirection: "column",
   gap: vars.spacing["3"],
   padding: vars.spacing["4"],
   backgroundColor: vars.color.surface,
   borderRadius: vars.radius.lg,
   boxShadow: vars.shadow.sm,
+});
+
+export const filterRow = style({
+  display: "flex",
+  alignItems: "center",
+  gap: vars.spacing["2"],
   flexWrap: "wrap",
 });
 

@@ -1,15 +1,30 @@
 import { useEffect, useRef, useState } from "react";
 import type { GetConsultationListParams } from "../../../shared/api/generated/api.schemas";
 import { useGetConsultationListQuery } from "../../../shared/api/generated/consultation-list";
+import { useGetCategoriesQuery } from "../../../shared/api/generated/meta-controller";
 import * as s from "./ConsultationListPage.css";
+
+// GetConsultationListParams를 그대로 사용 (categoryLarge는 api.schemas.ts에 추가됨)
+export type ConsultationListFilterParams = GetConsultationListParams;
 
 const RESULT_STATUS_OPTIONS  = ["처리중", "완료", "미완료", "요청중"];
 const SUMMARY_STATUS_OPTIONS = ["요약완료", "요청중", "실패"];
 const CHANNEL_OPTIONS        = ["전화", "채팅"];
 
+// 표시할 대분류 7개 (순서 유지)
+const LARGE_CATEGORY_ORDER = [
+  "부가서비스",
+  "해지/재약정",
+  "기기변경",
+  "기타",
+  "요금/납부",
+  "아웃바운드",
+  "장애/A/S",
+];
+
 interface FilterProps {
-  params: GetConsultationListParams;
-  onChange: (updates: Partial<GetConsultationListParams>) => void;
+  params: ConsultationListFilterParams;
+  onChange: (updates: Partial<ConsultationListFilterParams>) => void;
 }
 
 function DropdownFilter({
@@ -77,11 +92,17 @@ function DropdownFilter({
 }
 
 export function ConsultationListFilter({ params, onChange }: FilterProps) {
-  const [inputValue, setInputValue]         = useState(params.keyword ?? "");
-  const [debouncedValue, setDebouncedValue] = useState("");
+  const [inputValue, setInputValue]           = useState(params.keyword ?? "");
+  const [debouncedValue, setDebouncedValue]   = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const wrapperRef = useRef<HTMLDivElement>(null);
+
+  // 대분류 목록 fetch
+  const { data: categoryData } = useGetCategoriesQuery();
+  const largeCategoryOptions = LARGE_CATEGORY_ORDER.filter((name) =>
+    (categoryData ?? []).some((c) => c.largeCategory === name),
+  );
 
   // 300ms debounce
   useEffect(() => {
@@ -89,10 +110,8 @@ export function ConsultationListFilter({ params, onChange }: FilterProps) {
     return () => clearTimeout(timer);
   }, [inputValue]);
 
-  // 새 키워드로 바뀌면 하이라이트 초기화
   useEffect(() => { setHighlightedIndex(-1); }, [debouncedValue]);
 
-  // 외부 클릭 시 닫기
   useEffect(() => {
     if (!showSuggestions) return;
     const handler = (e: MouseEvent) => {
@@ -104,13 +123,12 @@ export function ConsultationListFilter({ params, onChange }: FilterProps) {
     return () => document.removeEventListener("mousedown", handler);
   }, [showSuggestions]);
 
-  // 추천어 fetch (debounce된 값이 1자 이상일 때만)
+  // 추천어 fetch
   const { data: suggestData } = useGetConsultationListQuery(
     { keyword: debouncedValue, size: 8, page: 0 },
     { query: { enabled: debouncedValue.length >= 1 } },
   );
 
-  // 현재 입력값을 포함하는 고객명 중복 제거 후 최대 6개
   const suggestions = Array.from(
     new Set(
       (suggestData?.data?.content ?? [])
@@ -159,8 +177,8 @@ export function ConsultationListFilter({ params, onChange }: FilterProps) {
 
   return (
     <div className={s.filterBar}>
+      {/* 1행: 검색창 */}
       <div className={s.searchGroup}>
-        {/* 추천어 드롭다운을 위한 relative 래퍼 */}
         <div ref={wrapperRef} style={{ position: "relative", flex: 1, display: "flex" }}>
           <input
             type="text"
@@ -168,13 +186,8 @@ export function ConsultationListFilter({ params, onChange }: FilterProps) {
             style={{ flex: 1, borderRadius: undefined }}
             placeholder="이름, 전화번호, 키워드 검색..."
             value={inputValue}
-            onChange={(e) => {
-              setInputValue(e.target.value);
-              setShowSuggestions(true);
-            }}
-            onFocus={() => {
-              if (inputValue.trim()) setShowSuggestions(true);
-            }}
+            onChange={(e) => { setInputValue(e.target.value); setShowSuggestions(true); }}
+            onFocus={() => { if (inputValue.trim()) setShowSuggestions(true); }}
             onKeyDown={handleKeyDown}
             autoComplete="off"
           />
@@ -186,10 +199,8 @@ export function ConsultationListFilter({ params, onChange }: FilterProps) {
                   key={name}
                   type="button"
                   className={`${s.dropdownItem}${i === highlightedIndex ? ` ${s.dropdownItemActive}` : ""}`}
-                  // mousedown 이벤트로 처리해야 input의 blur보다 먼저 실행됨
                   onMouseDown={(e) => { e.preventDefault(); submitSearch(name); }}
                 >
-                  {/* 매칭 부분 강조 */}
                   {(() => {
                     const idx = name.indexOf(debouncedValue);
                     if (idx === -1) return name;
@@ -212,24 +223,33 @@ export function ConsultationListFilter({ params, onChange }: FilterProps) {
         </button>
       </div>
 
-      <DropdownFilter
-        value={params.resultStatus ?? ""}
-        placeholder="처리상태"
-        options={RESULT_STATUS_OPTIONS}
-        onChange={(v) => onChange({ resultStatus: v })}
-      />
-      <DropdownFilter
-        value={params.summaryStatus ?? ""}
-        placeholder="요약상태"
-        options={SUMMARY_STATUS_OPTIONS}
-        onChange={(v) => onChange({ summaryStatus: v })}
-      />
-      <DropdownFilter
-        value={params.channel ?? ""}
-        placeholder="채널"
-        options={CHANNEL_OPTIONS}
-        onChange={(v) => onChange({ channel: v })}
-      />
+      {/* 2행: 필터 드롭다운 */}
+      <div className={s.filterRow}>
+        <DropdownFilter
+          value={params.categoryLarge ?? ""}
+          placeholder="상담 유형"
+          options={largeCategoryOptions}
+          onChange={(v) => onChange({ categoryLarge: v })}
+        />
+        <DropdownFilter
+          value={params.resultStatus ?? ""}
+          placeholder="처리상태"
+          options={RESULT_STATUS_OPTIONS}
+          onChange={(v) => onChange({ resultStatus: v })}
+        />
+        <DropdownFilter
+          value={params.summaryStatus ?? ""}
+          placeholder="요약상태"
+          options={SUMMARY_STATUS_OPTIONS}
+          onChange={(v) => onChange({ summaryStatus: v })}
+        />
+        <DropdownFilter
+          value={params.channel ?? ""}
+          placeholder="채널"
+          options={CHANNEL_OPTIONS}
+          onChange={(v) => onChange({ channel: v })}
+        />
+      </div>
     </div>
   );
 }
