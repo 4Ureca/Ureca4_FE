@@ -66,17 +66,6 @@ export function AdminDatePicker({ period, date, onDateChange }: Props) {
     setViewMonth(d.getMonth());
   }, [isOpen, date]);
 
-  // 외부 클릭 시 닫기
-  useEffect(() => {
-    if (!isOpen) return;
-    function handleClick(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, [isOpen]);
 
   const color = PERIOD_COLOR[period];
   const light = PERIOD_LIGHT[period];
@@ -220,7 +209,6 @@ export function AdminDatePicker({ period, date, onDateChange }: Props) {
                       type="button"
                       onClick={() => {
                         onDateChange(cellStr);
-                        setIsOpen(false);
                       }}
                       style={{
                         display: "flex", alignItems: "center", justifyContent: "center",

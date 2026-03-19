@@ -9,17 +9,18 @@ import {
   useGetOptimalTimeQuery,
 } from "../../shared/api/generated/outbound-report";
 import * as layout from "../../shared/ui/pageLayout.css";
+import { AdminDatePicker, PERIOD_COLOR } from "../admin-report/AdminDatePicker";
+import * as rs from "../admin-report/AdminReportPage.css";
 import type { Period } from "../analysis/PeriodSelector";
 import { PeriodSelector } from "../analysis/PeriodSelector";
-import * as rs from "../admin-report/AdminReportPage.css";
 import { OutboundAgentSection } from "./OutboundAgentSection";
 import { OutboundCallResultSection } from "./OutboundCallResultSection";
-import { OutboundRejectSection } from "./OutboundRejectSection";
 import { OutboundCampaignSection } from "./OutboundCampaignSection";
 import { OutboundConversionSection } from "./OutboundConversionSection";
 import { OutboundHeatmapSection } from "./OutboundHeatmapSection";
 import { OutboundKpiSection } from "./OutboundKpiSection";
 import { OutboundOptimalTimeSection } from "./OutboundOptimalTimeSection";
+import { OutboundRejectSection } from "./OutboundRejectSection";
 
 function localDateStr(d: Date): string {
   const y = d.getFullYear();
@@ -28,34 +29,6 @@ function localDateStr(d: Date): string {
   return `${y}-${m}-${day}`;
 }
 
-function toApiDate(period: Period, raw: string): string {
-  if (period === "weekly") {
-    // "2026-W12" → 해당 주 월요일 yyyy-MM-dd
-    const match = raw.match(/^(\d{4})-W(\d{2})$/);
-    if (match) {
-      const d = new Date(Number(match[1]), 0, 1 + (Number(match[2]) - 1) * 7);
-      d.setDate(d.getDate() - (d.getDay() || 7) + 1);
-      return localDateStr(d);
-    }
-  }
-  if (period === "monthly") {
-    return raw.length === 7 ? `${raw}-01` : raw;
-  }
-  return raw;
-}
-
-function toInputValue(period: Period, apiDate: string): string {
-  if (period === "weekly") {
-    const d = new Date(apiDate);
-    d.setDate(d.getDate() + 4 - (d.getDay() || 7));
-    const y = d.getFullYear();
-    const yearStart = new Date(y, 0, 1);
-    const w = Math.ceil((((d.valueOf() - yearStart.valueOf()) / 86400000) + 1) / 7);
-    return `${y}-W${String(w).padStart(2, "0")}`;
-  }
-  if (period === "monthly") return apiDate.slice(0, 7);
-  return apiDate;
-}
 
 export function OutboundPage() {
   const [period, setPeriod] = useState<Period>("daily");
@@ -65,11 +38,6 @@ export function OutboundPage() {
 
   function handlePeriodChange(p: Period) {
     setPeriod(p);
-    setDate(toApiDate(p, toInputValue(p, date)));
-  }
-
-  function handleDateChange(raw: string) {
-    setDate(toApiDate(period, raw));
   }
 
   const { data: kpi,         isPending: kpiPending     } = useGetKpiQuery(params);
@@ -84,15 +52,26 @@ export function OutboundPage() {
     <main className={layout.main}>
       <div className={rs.pageWrapper}>
         <div className={rs.header}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <div>
-              <h1 className={rs.title}>아웃바운드 분석</h1>
-              <p className={rs.subtitle}>기간별 아웃바운드 캠페인 성과 분석 (관리자 전용)</p>
-            </div>
-            <PeriodSelector period={period} date={toInputValue(period, date)} onPeriodChange={handlePeriodChange} onDateChange={handleDateChange} />
-          </div>
+          <h1 className={rs.title}>아웃바운드 분석</h1>
+          <p className={rs.subtitle}>기간별 아웃바운드 캠페인 성과 분석 (관리자 전용)</p>
         </div>
         <div className={rs.body}>
+
+          <div style={{ display: "flex", flexDirection: "row", alignSelf: "flex-end", alignItems: "flex-start", gap: "12px" }}>
+            <div className={rs.sectionCard} style={{ padding: "8px 12px" }}>
+              <PeriodSelector
+                period={period}
+                date={date}
+                onPeriodChange={handlePeriodChange}
+                onDateChange={setDate}
+                hideDateInput
+                activeColor={PERIOD_COLOR[period]}
+              />
+            </div>
+            <div className={rs.sectionCard}>
+              <AdminDatePicker period={period} date={date} onDateChange={setDate} />
+            </div>
+          </div>
 
           {/* KPI */}
           <OutboundKpiSection data={kpi} isPending={kpiPending} />
