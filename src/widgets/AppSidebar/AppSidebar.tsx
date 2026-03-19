@@ -10,7 +10,7 @@ interface AppSidebarProps {
 }
 
 export function AppSidebar({ label, children }: AppSidebarProps) {
-  const unreadCount = useGetUnreadCountQuery({ query: { staleTime: 0, refetchOnMount: "always", refetchInterval: 1_000 } }).data?.data ?? 0;
+  const unreadCount = useGetUnreadCountQuery({ query: { staleTime: 0, refetchOnMount: "always", refetchInterval: 120_000 } }).data?.data ?? 0;
 
   return (
     <aside className={layout.contextPanel}>

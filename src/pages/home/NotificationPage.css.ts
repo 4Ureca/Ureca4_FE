@@ -6,12 +6,22 @@ const fadeIn = keyframes({
   to:   { opacity: 1, transform: "translateY(0)" },
 });
 
+/* ─── Page Wrapper ─── */
+
+export const pageWrapper = style({
+  display: "flex",
+  flexDirection: "column",
+  flex: 1,
+  minHeight: 0,
+  overflowY: "auto",
+  overflowX: "hidden",
+});
+
 /* ─── Page Header ─── */
 
 export const pageHeader = style({
   backgroundImage: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
   padding: `${vars.spacing["8"]} ${vars.spacing["8"]} ${vars.spacing["6"]}`,
-  flexShrink: 0,
 });
 
 export const pageHeaderRow = style({
@@ -51,7 +61,7 @@ export const unreadChip = style({
 
 /* ─── Content ─── */
 
-export const content   = style({ flex: 1, padding: vars.spacing["6"], paddingLeft: vars.spacing["8"], paddingRight: vars.spacing["8"], overflowY: "auto", display: "flex", flexDirection: "column", gap: vars.spacing["4"], animation: `${fadeIn} 0.35s ease` });
+export const content   = style({ padding: vars.spacing["6"], paddingLeft: vars.spacing["8"], paddingRight: vars.spacing["8"], paddingBottom: vars.spacing["8"], display: "flex", flexDirection: "column", gap: vars.spacing["4"], animation: `${fadeIn} 0.35s ease` });
 export const stateText = style({ textAlign: "center", padding: `${vars.spacing["16"]} 0`, color: vars.color.textSecondary, fontSize: vars.fontSize.sm });
 
 /* ─── List ─── */
