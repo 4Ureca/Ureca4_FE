@@ -5,8 +5,9 @@ import { ROUTES } from "../../shared/config/routes";
 
 export const Route = createFileRoute("/_app/admin-manual")({
 	beforeLoad: () => {
+		if (typeof window === "undefined") return;
 		if (getRole() !== "관리자") {
-			throw redirect({ to: ROUTES.HOME });
+			throw redirect({ to: ROUTES.EXCELLENT });
 		}
 	},
 	component: AdminManualListPage,

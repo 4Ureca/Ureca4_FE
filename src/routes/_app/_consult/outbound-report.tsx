@@ -5,7 +5,8 @@ import { OutboundPage } from "../../../pages/outbound/OutboundPage";
 
 export const Route = createFileRoute("/_app/_consult/outbound-report")({
   beforeLoad: () => {
-    if (getRole() !== "관리자") throw redirect({ to: ROUTES.HOME });
+    if (typeof window === "undefined") return;
+    if (getRole() !== "관리자") throw redirect({ to: ROUTES.EXCELLENT });
   },
   component: OutboundPage,
 });

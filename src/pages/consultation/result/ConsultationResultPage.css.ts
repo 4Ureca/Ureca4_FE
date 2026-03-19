@@ -973,6 +973,15 @@ export const bookmarkDetailBody = style({
   maxHeight: "260px",
 });
 
+export const bookmarkDetailFieldCard = style({
+  backgroundColor: vars.color.surface,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.md,
+  padding: `${vars.spacing["2"]} ${vars.spacing["3"]}`,
+  width: "100%",
+  boxSizing: "border-box",
+});
+
 export const bookmarkDetailLabel = style({
   fontSize: vars.fontSize.xs,
   fontWeight: vars.fontWeight.semibold,

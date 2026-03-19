@@ -27,43 +27,43 @@ export function ConsultationResultSummaryDetail({ consultId, onClose }: Props) {
         {!isPending && !isError && data && (
           <>
             {data.consultedAt && (
-              <div>
+              <div className={s.bookmarkDetailFieldCard}>
                 <p className={s.bookmarkDetailLabel}>상담일시</p>
                 <p className={s.bookmarkDetailValue}>{data.consultedAt.slice(0, 10)}</p>
               </div>
             )}
             {data.customer?.name && (
-              <div>
+              <div className={s.bookmarkDetailFieldCard}>
                 <p className={s.bookmarkDetailLabel}>고객명</p>
                 <p className={s.bookmarkDetailValue}>{data.customer.name}</p>
               </div>
             )}
             {data.channel && (
-              <div>
+              <div className={s.bookmarkDetailFieldCard}>
                 <p className={s.bookmarkDetailLabel}>채널</p>
                 <p className={s.bookmarkDetailValue}>{data.channel}</p>
               </div>
             )}
             {data.category?.small && (
-              <div>
+              <div className={s.bookmarkDetailFieldCard}>
                 <p className={s.bookmarkDetailLabel}>카테고리</p>
                 <p className={s.bookmarkDetailValue}>{data.category.small}</p>
               </div>
             )}
             {data.summary?.content && (
-              <div>
+              <div className={s.bookmarkDetailFieldCard}>
                 <p className={s.bookmarkDetailLabel}>요약</p>
                 <p className={s.bookmarkDetailValue}>{data.summary.content}</p>
               </div>
             )}
             {data.iam?.issue && (
-              <div>
+              <div className={s.bookmarkDetailFieldCard}>
                 <p className={s.bookmarkDetailLabel}>이슈</p>
                 <p className={s.bookmarkDetailValue}>{data.iam.issue}</p>
               </div>
             )}
             {data.iam?.action && (
-              <div>
+              <div className={s.bookmarkDetailFieldCard}>
                 <p className={s.bookmarkDetailLabel}>처리 내용</p>
                 <p className={s.bookmarkDetailValue}>{data.iam.action}</p>
               </div>

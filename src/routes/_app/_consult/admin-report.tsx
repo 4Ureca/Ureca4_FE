@@ -5,7 +5,8 @@ import { AdminReportPage } from "../../../pages/admin-report/AdminReportPage";
 
 export const Route = createFileRoute("/_app/_consult/admin-report")({
   beforeLoad: () => {
-    if (getRole() !== "관리자") throw redirect({ to: ROUTES.HOME });
+    if (typeof window === "undefined") return;
+    if (getRole() !== "관리자") throw redirect({ to: ROUTES.EXCELLENT });
   },
   component: AdminReportPage,
 });

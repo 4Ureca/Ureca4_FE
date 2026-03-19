@@ -25,7 +25,7 @@ function SavedFiltersPanel({ activeFilterId, onFilterSelect }: SavedFiltersPanel
   return (
     <div className={s.bookmarkPanel}>
       <div className={s.bookmarkPanelHeader}>
-        <p className={s.bookmarkPanelTitle}>저장된 검색조건</p>
+        <p className={s.bookmarkPanelTitle}>🔖 저장된 검색조건</p>
         <span className={s.bookmarkPanelItemMeta}>{groups.length}개</span>
       </div>
       <div className={s.bookmarkPanelBody}>
@@ -60,7 +60,7 @@ function MyBookmarksPanel({ onSelectBookmark }: { onSelectBookmark: (consultId: 
   return (
     <div className={s.bookmarkPanel}>
       <div className={s.bookmarkPanelHeader}>
-        <p className={s.bookmarkPanelTitle}>내 상담 북마크</p>
+        <p className={s.bookmarkPanelTitle}>⭐ 내 상담 북마크</p>
         <span className={s.bookmarkPanelItemMeta}>{bookmarks.length}개</span>
       </div>
       <div className={s.bookmarkPanelBody}>
@@ -117,7 +117,7 @@ function ConsultSearchPanel({ filterParams, filterName, onSelectSummary }: Consu
   return (
     <div className={s.bookmarkPanelLarge}>
       <div className={s.bookmarkPanelHeader}>
-        <p className={s.bookmarkPanelTitle}>상담 요약 검색</p>
+        <p className={s.bookmarkPanelTitle}>🔍 상담 요약 검색</p>
       </div>
       <div className={s.searchRow}>
         <input
