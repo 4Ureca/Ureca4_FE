@@ -11,8 +11,10 @@ export const filterCard = style({
   backgroundColor: vars.color.surface,
   borderRadius: vars.radius.lg,
   boxShadow: vars.shadow.sm,
-  margin: `${vars.spacing["4"]} ${vars.spacing["8"]} 0`,
+  margin: `${vars.spacing["4"]} auto 0`,
   flexShrink: 0,
+  width: "50%",
+  minWidth: "480px",
 });
 
 /* ─── 행 레이아웃 ─── */

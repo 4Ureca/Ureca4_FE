@@ -43,30 +43,34 @@ export const content = style({
 export const filterBar = style({
   display: "flex",
   flexDirection: "column",
-  gap: vars.spacing["3"],
-  padding: vars.spacing["4"],
+  gap: vars.spacing["2"],
+  padding: vars.spacing["3"],
   backgroundColor: vars.color.surface,
   borderRadius: vars.radius.lg,
   boxShadow: vars.shadow.sm,
+  maxWidth: "480px",
+  marginLeft: "auto",
+  marginRight: "auto",
+  width: "100%",
 });
 
 export const filterRow = style({
   display: "flex",
   alignItems: "center",
+  justifyContent: "center",
   gap: vars.spacing["2"],
   flexWrap: "wrap",
 });
 
 export const searchGroup = style({
   display: "flex",
-  flex: 1,
-  minWidth: "200px",
+  width: "100%",
   gap: 0,
 });
 
 export const searchInput = style({
   flex: 1,
-  padding: `${vars.spacing["2"]} ${vars.spacing["3"]}`,
+  padding: vars.spacing["2"],
   border: `1px solid ${vars.color.border}`,
   borderRight: "none",
   borderRadius: `${vars.radius.md} 0 0 ${vars.radius.md}`,
@@ -81,7 +85,7 @@ export const searchInput = style({
 });
 
 export const searchBtn = style({
-  padding: `${vars.spacing["2"]} ${vars.spacing["3"]}`,
+  padding: vars.spacing["2"],
   border: `1px solid ${vars.color.primary}`,
   borderRadius: `0 ${vars.radius.md} ${vars.radius.md} 0`,
   backgroundColor: vars.color.primary,
@@ -103,8 +107,8 @@ export const dropdownWrapper = style({
 export const dropdownTrigger = style({
   display: "inline-flex",
   alignItems: "center",
-  gap: vars.spacing["2"],
-  padding: `${vars.spacing["2"]} ${vars.spacing["3"]}`,
+  gap: vars.spacing["1"],
+  padding: vars.spacing["2"],
   border: `1px solid ${vars.color.border}`,
   borderRadius: vars.radius.md,
   fontSize: vars.fontSize.sm,
@@ -200,7 +204,7 @@ export const thead = style({
 });
 
 export const th = style({
-  padding: `${vars.spacing["3"]} ${vars.spacing["4"]}`,
+  padding: `${vars.spacing["2"]} ${vars.spacing["3"]}`,
   textAlign: "left",
   fontSize: vars.fontSize.xs,
   fontWeight: vars.fontWeight.semibold,
@@ -214,7 +218,7 @@ export const tr = style({
 });
 
 export const td = style({
-  padding: `${vars.spacing["3"]} ${vars.spacing["4"]}`,
+  padding: `${vars.spacing["2"]} ${vars.spacing["3"]}`,
   color: vars.color.textPrimary,
   whiteSpace: "nowrap",
 });

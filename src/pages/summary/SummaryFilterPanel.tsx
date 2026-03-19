@@ -98,11 +98,11 @@ const rsStyles: any = {
   menu: (base: object) => menuBase(base, "200px"),
 };
 
-// 카테고리 검색 — flex:2, 더 넓게 (라벨이 "대분류 > 중분류 > 소분류" 형태)
+// 카테고리 검색 — 고정 너비 (라벨이 "대분류 > 중분류 > 소분류" 형태)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const rsCategoryStyles: any = {
   ...rsBase,
-  container: (base: object) => ({ ...base, flex: 2, minWidth: "280px" }),
+  container: (base: object) => ({ ...base, flex: 1, minWidth: "280px", maxWidth: "400px" }),
   menu: (base: object) => menuBase(base, "440px"),
 };
 
@@ -377,19 +377,6 @@ export function SummaryFilterPanel({ onSearch, forceDraft }: Props) {
             <button type="button" className={s.searchBtn} onClick={handleSearch}>검색</button>
           </div>
 
-          <DropdownFilter
-            placeholder="채널"
-            options={CHANNEL_OPTS}
-            value={draft.channel}
-            onChange={(v) => set("channel", v)}
-          />
-          <MultiDropdown
-            placeholder="리스크 유형"
-            options={RISK_TYPE_OPTS}
-            value={draft.riskType}
-            onChange={(v) => set("riskType", v)}
-          />
-
           <button
             type="button"
             className={`${s.accordionToggle}${expanded ? ` ${s.accordionToggleActive}` : ""}`}
@@ -401,8 +388,9 @@ export function SummaryFilterPanel({ onSearch, forceDraft }: Props) {
           </button>
         </div>
 
-        {/* ── 아코디언: 상세 조건 ── */}
+        {/* ── 아코디언: 상세 조건 + 푸터 ── */}
         {expanded && (
+          <>
           <div className={s.accordionSection}>
 
             {/* 상담 정보 */}
@@ -432,6 +420,20 @@ export function SummaryFilterPanel({ onSearch, forceDraft }: Props) {
                   option.label.toLowerCase().includes(input.toLowerCase())
                 }
                 noOptionsMessage={() => "검색 결과 없음"}
+              />
+            </div>
+            <div className={s.filterRow}>
+              <DropdownFilter
+                placeholder="채널"
+                options={CHANNEL_OPTS}
+                value={draft.channel}
+                onChange={(v) => set("channel", v)}
+              />
+              <MultiDropdown
+                placeholder="리스크 유형"
+                options={RISK_TYPE_OPTS}
+                value={draft.riskType}
+                onChange={(v) => set("riskType", v)}
               />
               <MultiDropdown
                 placeholder="리스크 수준"
@@ -515,17 +517,19 @@ export function SummaryFilterPanel({ onSearch, forceDraft }: Props) {
             </div>
 
           </div>
-        )}
 
-        {/* ── 푸터 ── */}
-        <div className={s.filterFooter}>
-          <button type="button" className={s.btnReset} onClick={handleReset}>↺ 초기화</button>
-          <div className={s.footerRight}>
-            <button type="button" className={s.btnSave} onClick={() => { setSaveName(""); setShowSave(true); }}>☆ 조건 저장</button>
-            <button type="button" className={s.btnSearch} onClick={handleSearch}>⌕ 검색</button>
+          {/* ── 푸터 ── */}
+          <div className={s.filterFooter}>
+            <button type="button" className={s.btnReset} onClick={handleReset}>↺ 초기화</button>
+            <div className={s.footerRight}>
+              <button type="button" className={s.btnSave} onClick={() => { setSaveName(""); setShowSave(true); }}>☆ 조건 저장</button>
+              <button type="button" className={s.btnSearch} onClick={handleSearch}>⌕ 조건 검색</button>
+            </div>
           </div>
-        </div>
+          </>
+        )}
       </div>
+
 
       {/* ── 저장 결과 모달 ── */}
       {result != null && (

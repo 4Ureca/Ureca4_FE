@@ -76,21 +76,21 @@ export function AdminReportPage() {
           <p className={s.subtitle}>기간별 상담 운영 통합 분석 (관리자 전용)</p>
         </div>
         <div className={s.body}>
-          {/* 기간 선택 카드 */}
-          <div className={s.sectionCard}>
-            <PeriodSelector
-              period={period}
-              date={date}
-              onPeriodChange={setPeriod}
-              onDateChange={setDate}
-              hideDateInput
-              activeColor={PERIOD_COLOR[period]}
-            />
-          </div>
-
-          {/* 날짜 선택 카드 (달력) */}
-          <div className={s.sectionCard} style={{ alignSelf: "flex-start" }}>
-            <AdminDatePicker period={period} date={date} onDateChange={setDate} />
+          {/* 기간 선택 + 날짜 선택 카드: 같은 너비로 */}
+          <div style={{ display: "flex", flexDirection: "column", alignSelf: "flex-start", width: "fit-content" }}>
+            <div className={s.sectionCard} style={{ marginBottom: "12px", padding: "8px 12px" }}>
+              <PeriodSelector
+                period={period}
+                date={date}
+                onPeriodChange={setPeriod}
+                onDateChange={setDate}
+                hideDateInput
+                activeColor={PERIOD_COLOR[period]}
+              />
+            </div>
+            <div className={s.sectionCard}>
+              <AdminDatePicker period={period} date={date} onDateChange={setDate} />
+            </div>
           </div>
 
           {period === "daily" ? (

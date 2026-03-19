@@ -12,6 +12,7 @@ import {
   GetCandidatesStatus,
   type EvaluationListResponse,
 } from "../../../shared/api/generated/api.schemas";
+import { getRole } from "../../../shared/api/roleStore";
 import * as layout from "../../../shared/ui/pageLayout.css";
 import { DashboardSidebar } from "../../../widgets/DashboardSidebar/DashboardSidebar";
 import { AdminExcellentCaseDetailModal } from "./AdminExcellentCaseDetailModal";
@@ -280,7 +281,7 @@ export function AdminExcellentCasesPage() {
 
   return (
     <>
-      <DashboardSidebar isAdmin />
+      <DashboardSidebar isAdmin={getRole() === "관리자"} />
 
       <main className={layout.main}>
         <div className={s.pageWrapper}>
