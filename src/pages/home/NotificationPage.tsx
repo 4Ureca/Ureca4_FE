@@ -100,6 +100,7 @@ export function NotificationPage() {
       <DashboardSidebar isAdmin={getRole() === "관리자"} />
 
       <main className={layout.main}>
+        <div className={s.pageWrapper}>
         <div className={s.pageHeader}>
           <div className={s.pageHeaderRow}>
             <div>
@@ -139,6 +140,7 @@ export function NotificationPage() {
               </div>
             </div>
           )}
+        </div>
         </div>
       </main>
     </>
