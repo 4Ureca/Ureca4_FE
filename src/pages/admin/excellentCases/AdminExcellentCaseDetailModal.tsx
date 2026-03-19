@@ -21,13 +21,13 @@ interface Props {
 type Tab = "summary" | "chat";
 
 const STATUS_LABEL: Record<string, string> = {
-  PENDING:  "검토 대기",
+  PENDING: "검토 대기",
   SELECTED: "선정됨",
   REJECTED: "후보 제외",
 };
 
 const STATUS_STYLE: Record<string, React.CSSProperties> = {
-  PENDING:  { backgroundColor: "#FEF3C7", color: "#92400E" },
+  PENDING: { backgroundColor: "#FEF3C7", color: "#92400E" },
   SELECTED: { backgroundColor: "#DCFCE7", color: "#166534" },
   REJECTED: { backgroundColor: "#FEF2F2", color: "#991B1B" },
 };
@@ -40,35 +40,57 @@ export function AdminExcellentCaseDetailModal({ consultId, onClose, initialSelec
   const queryClient = useQueryClient();
   const { data: detail, isPending, isError } = useGetDetailQuery(consultId);
 
+  // 🥊 [핵심] 모든 캐시를 완전히 날리고 API를 서버에서 새로 불러오게 강제하는 함수
+  const forceGlobalRefresh = async (message: string) => {
+    // 1. 후보군 관리 도메인과 관련된 모든 캐시(리스트, 4개 카운트)를 완전히 초기화
+    await queryClient.resetQueries({ queryKey: ["admin-excellent-case"] });
+    await queryClient.resetQueries({ queryKey: ["/admin/excellent-cases/candidates"] });
+    
+    // 2. 현재 열려있는 상세 팝업의 데이터도 즉시 갱신
+    await queryClient.invalidateQueries({ queryKey: getDetailKey(consultId) });
+    
+    // 3. 화면에 보이는 모든 쿼리 즉시 다시 찌르기 (상단 숫자 동기화용)
+    await queryClient.refetchQueries({ type: "active" });
+
+    alert(message);
+    setIsSelectMode(false);
+    onClose();
+  };
+
   const selectMutation = useMutationPostSelectExcellentCaseQuery({
     mutation: {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["/admin/excellent-cases/candidates"] });
-        queryClient.invalidateQueries({ queryKey: getDetailKey(consultId) });
-        setIsSelectMode(false);
-        onClose();
-      },
-      onError: () => {
-        alert("선정 처리 중 오류가 발생했습니다. 다시 시도해 주세요.");
+      onSuccess: () => forceGlobalRefresh("성공적으로 선정되었습니다."),
+      onError: (error: any) => {
+        // 서버 200 OK인데 빈 응답값 때문에 발생하는 SyntaxError 대응
+        if (error.response?.status === 200 || error.name === 'SyntaxError') {
+          forceGlobalRefresh("성공적으로 선정되었습니다.");
+        } else {
+          alert("선정 처리 중 오류가 발생했습니다.");
+        }
       },
     },
   });
 
   const rejectMutation = useMutationPatchRejectExcellentCaseQuery({
     mutation: {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["/admin/excellent-cases/candidates"] });
-        queryClient.invalidateQueries({ queryKey: getDetailKey(consultId) });
-        onClose();
-      },
-      onError: () => {
-        alert("후보 제외 처리 중 오류가 발생했습니다. 다시 시도해 주세요.");
+      onSuccess: () => forceGlobalRefresh("후보군에서 제외되었습니다."),
+      onError: (error: any) => {
+        if (error.response?.status === 200 || error.name === 'SyntaxError') {
+          forceGlobalRefresh("후보군에서 제외되었습니다.");
+        } else {
+          alert("후보 제외 처리 중 오류가 발생했습니다.");
+        }
       },
     },
   });
 
   const status = detail?.selectionStatus ?? "PENDING";
-  const canSelect = status === EvaluationDetailResponseSelectionStatus.PENDING;
+
+  // 🥊 [수정 포인트] (대기 or 제외 상태) 이면서 (점수가 90점 이상)인 경우에만 선정 버튼 노출
+  const canSelect = (status === EvaluationDetailResponseSelectionStatus.PENDING 
+    || status === EvaluationDetailResponseSelectionStatus.REJECTED)
+    && (detail?.score ?? 0) >= 90;
+
   const canReject = status === EvaluationDetailResponseSelectionStatus.PENDING
     || status === EvaluationDetailResponseSelectionStatus.SELECTED;
 
@@ -76,7 +98,7 @@ export function AdminExcellentCaseDetailModal({ consultId, onClose, initialSelec
     <div className={ms.tabBar}>
       {([
         { key: "summary" as Tab, label: "요약 / 평가" },
-        { key: "chat"    as Tab, label: "원문 대화" },
+        { key: "chat" as Tab, label: "원문 대화" },
       ]).map(({ key, label }) => (
         <button
           key={key}
@@ -134,7 +156,11 @@ export function AdminExcellentCaseDetailModal({ consultId, onClose, initialSelec
                 <button
                   type="button"
                   disabled={rejectMutation.isPending}
-                  onClick={() => rejectMutation.mutate({ consultId })}
+                  onClick={() => {
+                    if (window.confirm("이 후보를 정말 제외하시겠습니까?")) {
+                      rejectMutation.mutate({ consultId });
+                    }
+                  }}
                   style={{ ...btnBase, backgroundColor: "#FEF2F2", color: "#DC2626", border: "1px solid #FECACA" }}
                 >
                   {rejectMutation.isPending ? "처리 중..." : "후보 제외"}
@@ -166,7 +192,7 @@ export function AdminExcellentCaseDetailModal({ consultId, onClose, initialSelec
       footer={footer}
     >
       {isPending && <p className={ms.stateText}>불러오는 중...</p>}
-      {isError   && <p className={ms.stateText}>데이터를 불러오지 못했습니다.</p>}
+      {isError && <p className={ms.stateText}>데이터를 불러오지 못했습니다.</p>}
 
       {!isPending && !isError && detail && (
         <>
@@ -224,6 +250,7 @@ export function AdminExcellentCaseDetailModal({ consultId, onClose, initialSelec
                 <div className={ms.fieldGroup}>
                   <p className={ms.fieldLabel}>관리자 선정 사유 (선택)</p>
                   <textarea
+                    autoFocus
                     value={adminReason}
                     onChange={(e) => setAdminReason(e.target.value)}
                     placeholder="선정 사유를 입력하세요. (우수 사례 게시판에 표시됩니다)"
