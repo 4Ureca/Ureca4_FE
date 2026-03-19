@@ -129,8 +129,6 @@ function BookmarkList({ onDetail }: { onDetail: (consultId: number) => void }) {
 
 export function MyBookmarksPage() {
   const [detailConsultId, setDetailConsultId] = useState<number | null>(null);
-  const { data } = useGetConsultationBookmarksQuery();
-  const total = data?.data?.length ?? 0;
 
   return (
     <main className={layout.main}>

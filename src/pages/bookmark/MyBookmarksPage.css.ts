@@ -1,4 +1,4 @@
-import { style, styleVariants } from "@vanilla-extract/css";
+import { style } from "@vanilla-extract/css";
 import { vars } from "../../shared/design";
 
 export const pageWrapper = style({ display: "flex", flexDirection: "column", height: "100%", overflowY: "auto" });
