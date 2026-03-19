@@ -1,9 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "../../shared/api/client";
 import type { ManualResponse } from "../../shared/api/generated/api.schemas";
+import {
+  useGetManualBookmarksQuery,
+  useMutationPostManualBookmarkQuery,
+  useMutationDeleteManualBookmarkQuery,
+} from "../../shared/api/generated/bookmark";
+import { getManualBookmarksKey } from "../../shared/api/generated/bookmark/bookmark.keys";
 import { useGetCategoriesQuery } from "../../shared/api/generated/meta-controller";
 import * as layout from "../../shared/ui/pageLayout.css";
+import { ManualDetailModal } from "./ManualDetailModal";
 import * as s from "./ManualPage.css";
 
 interface ManualPageResponse {
@@ -159,13 +166,51 @@ function CategoryAutocomplete({
   );
 }
 
+/* ─── BookmarkToggle ─── */
+
+function BookmarkToggle({ manualId, bookmarkedIds }: { manualId: number; bookmarkedIds: Set<number> }) {
+  const qc = useQueryClient();
+  const { mutate: add, isPending: isAdding } = useMutationPostManualBookmarkQuery();
+  const { mutate: remove, isPending: isRemoving } = useMutationDeleteManualBookmarkQuery();
+  const [optimistic, setOptimistic] = useState<boolean | null>(null);
+
+  const isBookmarked = optimistic !== null ? optimistic : bookmarkedIds.has(manualId);
+  const isPending2 = isAdding || isRemoving;
+
+  const handleToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const next = !isBookmarked;
+    setOptimistic(next);
+    const onSuccess = () => { qc.invalidateQueries({ queryKey: getManualBookmarksKey() }); setOptimistic(null); };
+    const onError = () => setOptimistic(null);
+    if (next) add({ manualId }, { onSuccess, onError });
+    else remove({ manualId }, { onSuccess, onError });
+  };
+
+  return (
+    <button type="button" className={s.bookmarkBtn} onClick={handleToggle}
+      disabled={isPending2} title={isBookmarked ? "북마크 해제" : "북마크 추가"}
+      style={isBookmarked ? { color: "#F59E0B" } : undefined}>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill={isBookmarked ? "currentColor" : "none"}
+        stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+      </svg>
+    </button>
+  );
+}
+
 /* ─── ManualPage ─── */
 const PAGE_SIZE = 20;
 
 export function ManualPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [page, setPage]                         = useState(0);
-  const [expandedId, setExpandedId]             = useState<number | null>(null);
+  const [selectedManual, setSelectedManual]     = useState<ManualResponse | null>(null);
+
+  const { data: bookmarksData } = useGetManualBookmarksQuery();
+  const bookmarkedIds = new Set(
+    (bookmarksData?.data ?? []).map((b) => b.manualId).filter((id): id is number => id != null),
+  );
 
   const { data, isPending, isError } = useManualHistoryQuery({
     categoryCode: selectedCategory || undefined,
@@ -188,10 +233,11 @@ export function ManualPage() {
   function handleCategoryChange(code: string) {
     setSelectedCategory(code);
     setPage(0);
-    setExpandedId(null);
+    setSelectedManual(null);
   }
 
   return (
+    <>
     <main className={layout.main}>
       <div className={s.pageWrapper}>
         <div className={s.pageHeader}>
@@ -224,14 +270,14 @@ export function ManualPage() {
             <div className={s.list}>
               {items.map((item) => {
                 const id     = item.manualId ?? 0;
-                const isOpen = expandedId === id;
                 return (
                   <div key={id} className={s.card}>
                     <button
                       type="button"
                       className={s.cardHeader}
-                      onClick={() => setExpandedId(isOpen ? null : id)}
+                      onClick={() => setSelectedManual(item)}
                     >
+                      <BookmarkToggle manualId={id} bookmarkedIds={bookmarkedIds} />
                       <div className={s.cardHeaderLeft}>
                         {item.categoryName && (
                           <span className={s.categoryPill}>{item.categoryName}</span>
@@ -242,19 +288,9 @@ export function ManualPage() {
                         {item.updatedAt && (
                           <span className={s.dateText}>{item.updatedAt.slice(0, 10)}</span>
                         )}
-                        <span
-                          className={s.chevron}
-                          style={{ transform: isOpen ? "rotate(90deg)" : "rotate(0deg)" }}
-                        >
-                          ›
-                        </span>
+                        <span className={s.chevron}>›</span>
                       </div>
                     </button>
-                    {isOpen && (
-                      <div className={s.cardBody}>
-                        <p className={s.cardContent}>{item.content}</p>
-                      </div>
-                    )}
                   </div>
                 );
               })}
@@ -265,24 +301,29 @@ export function ManualPage() {
           {!isPending && !isError && totalPages > 1 && (
             <div className={s.pagination}>
               <button type="button" className={s.pageBtn} disabled={page === 0}
-                onClick={() => { setPage(0); setExpandedId(null); }}>«</button>
+                onClick={() => { setPage(0); setSelectedManual(null); }}>«</button>
               <button type="button" className={s.pageBtn} disabled={page === 0}
-                onClick={() => { setPage(p => p - 1); setExpandedId(null); }}>‹</button>
+                onClick={() => { setPage(p => p - 1); setSelectedManual(null); }}>‹</button>
               {Array.from({ length: totalPages }, (_, i) => i).map((p) => (
                 <button key={p} type="button"
                   className={p === page ? s.pageBtnActive : s.pageBtn}
-                  onClick={() => { setPage(p); setExpandedId(null); }}>
+                  onClick={() => { setPage(p); setSelectedManual(null); }}>
                   {p + 1}
                 </button>
               ))}
               <button type="button" className={s.pageBtn} disabled={page === totalPages - 1}
-                onClick={() => { setPage(p => p + 1); setExpandedId(null); }}>›</button>
+                onClick={() => { setPage(p => p + 1); setSelectedManual(null); }}>›</button>
               <button type="button" className={s.pageBtn} disabled={page === totalPages - 1}
-                onClick={() => { setPage(totalPages - 1); setExpandedId(null); }}>»</button>
+                onClick={() => { setPage(totalPages - 1); setSelectedManual(null); }}>»</button>
             </div>
           )}
         </div>
       </div>
     </main>
+
+    {selectedManual != null && (
+      <ManualDetailModal manual={selectedManual} onClose={() => setSelectedManual(null)} />
+    )}
+    </>
   );
 }

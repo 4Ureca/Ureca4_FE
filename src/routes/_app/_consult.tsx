@@ -61,7 +61,7 @@ function ConsultLayout() {
 				{role === "상담사" && (
 					<ContextNavItem
 						icon={<BookIcon />}
-						label="메뉴얼"
+						label="매뉴얼"
 						to={ROUTES.MANUAL}
 					/>
 				)}
