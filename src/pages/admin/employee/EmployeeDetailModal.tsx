@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
 	useGetEmployeeDetailQuery,
 	useMutationPutEmployeeQuery,
+	getEmployeeDetailKey,
 } from "../../../shared/api/generated/admin-employee-management";
 import { BaseModal } from "../../../shared/ui/BaseModal/BaseModal";
 import { Button } from "../../../shared/ui/Button/Button";
@@ -48,6 +50,7 @@ export function EmployeeDetailModal({
 		isPending,
 		isError,
 	} = useGetEmployeeDetailQuery(empId, { query: { staleTime: 0 } });
+	const queryClient = useQueryClient();
 	const putMutation = useMutationPutEmployeeQuery();
 	const isSaving = putMutation.isPending;
 
@@ -89,6 +92,7 @@ export function EmployeeDetailModal({
 			},
 			{
 				onSuccess: () => {
+					queryClient.invalidateQueries({ queryKey: getEmployeeDetailKey(empId) });
 					setIsEditing(false);
 					setInitialized(false);
 				},
