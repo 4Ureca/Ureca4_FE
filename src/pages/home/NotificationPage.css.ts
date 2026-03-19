@@ -109,3 +109,33 @@ export const typeBadge = style({
 });
 
 export const unreadDot = style({ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "#E1006A", flexShrink: 0 });
+
+/* ─── Pagination ─── */
+
+export const pagination  = style({ display: "flex", alignItems: "center", justifyContent: "space-between", padding: `${vars.spacing["3"]} ${vars.spacing["4"]}` });
+export const pageInfo    = style({ fontSize: vars.fontSize.xs, color: vars.color.textSecondary });
+export const pageButtons = style({ display: "flex", alignItems: "center", gap: vars.spacing["1"] });
+
+export const pageBtn = style({
+  minWidth: "32px", height: "32px",
+  padding: `0 ${vars.spacing["2"]}`,
+  border: `1px solid ${vars.color.border}`,
+  borderRadius: vars.radius.sm,
+  backgroundColor: vars.color.surface,
+  color: vars.color.textSecondary,
+  fontSize: vars.fontSize.xs,
+  cursor: "pointer",
+  transition: `all ${vars.transition.fast}`,
+  ":hover": { borderColor: vars.color.primary, color: vars.color.primary },
+});
+
+export const pageBtnActive = style([pageBtn, {
+  backgroundColor: vars.color.primary, borderColor: vars.color.primary,
+  color: "#FFFFFF", fontWeight: vars.fontWeight.semibold,
+  ":hover": { backgroundColor: vars.color.primaryHover, borderColor: vars.color.primaryHover },
+}]);
+
+export const pageBtnDisabled = style([pageBtn, {
+  opacity: 0.4, cursor: "not-allowed",
+  ":hover": { borderColor: vars.color.border, color: vars.color.textSecondary },
+}]);

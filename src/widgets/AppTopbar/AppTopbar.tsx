@@ -3,7 +3,6 @@ import { ROUTES } from "../../shared/config/routes";
 import {
   AnalysisIcon,
   ConsultationIcon,
-  HomeIcon,
   OnlineIndicator,
   SettingsIcon,
   UPlusLogoIcon,
@@ -25,9 +24,8 @@ export function AppTopbar() {
       </div>
 
       <nav className={s.tabs}>
-        <NavTab to={ROUTES.HOME} icon={<HomeIcon />} label="홈" />
-        <NavTab icon={<ConsultationIcon />} label="상담 업무" to={ROUTES.CONSULT} />
         <NavTab icon={<AnalysisIcon />} label="대시보드" to={ROUTES.EXCELLENT} />
+        <NavTab icon={<ConsultationIcon />} label="상담 업무" to={ROUTES.CONSULT} />
         {isAdmin && <NavTab icon={<SettingsIcon />} label="관리" to={ROUTES.ADMIN_EMPLOYEES} />}
       </nav>
 

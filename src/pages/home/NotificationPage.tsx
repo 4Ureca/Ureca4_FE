@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import type { NotificationResponse } from "../../shared/api/generated/api.schemas";
@@ -6,12 +7,10 @@ import {
   useMutationPatchNotificationReadQuery, useMutationPatchNotificationsReadAllQuery,
 } from "../../shared/api/generated/notification";
 import { getNotificationsKey, getUnreadCountKey } from "../../shared/api/generated/notification/notification.keys";
-import { ROUTES } from "../../shared/config/routes";
 import { NOTIFICATION_TYPE_META as TYPE_META } from "../../shared/config/notificationMeta";
-import { ContextNavItem } from "../../shared/ui/ContextNavItem";
-import { HomeIcon, NoticeIcon, CalendarIcon } from "../../shared/ui/icons";
+import { getRole } from "../../shared/api/roleStore";
 import * as layout from "../../shared/ui/pageLayout.css";
-import { AppSidebar } from "../../widgets/AppSidebar/AppSidebar";
+import { DashboardSidebar } from "../../widgets/DashboardSidebar/DashboardSidebar";
 import { Button } from "../../shared/ui/Button/Button";
 import * as s from "./NotificationPage.css";
 
@@ -47,15 +46,29 @@ function NotificationItem({ item, onRead }: { item: NotificationResponse; onRead
   );
 }
 
+const PAGE_SIZE = 10;
+const GROUP_SIZE = 5;
+
 export function NotificationPage() {
+  const [currentPage, setCurrentPage] = useState(1);
   const queryClient     = useQueryClient();
-  const { data, isPending, isError } = useGetNotificationsQuery({ page: 0, size: 20 }, { query: { staleTime: 0, refetchOnMount: "always" } });
+  const { data, isPending, isError } = useGetNotificationsQuery({ page: currentPage - 1, size: PAGE_SIZE }, { query: { staleTime: 0, refetchOnMount: "always" } });
   const { data: unreadData }         = useGetUnreadCountQuery({ query: { staleTime: 0, refetchOnMount: "always" } });
   const readMutation    = useMutationPatchNotificationReadQuery();
   const readAllMutation = useMutationPatchNotificationsReadAllQuery();
 
-  const items       = data?.data?.content ?? [];
-  const unreadCount = unreadData?.data ?? 0;
+  const items         = data?.data?.content ?? [];
+  const totalPages    = data?.data?.totalPages ?? 0;
+  const totalElements = data?.data?.totalElements ?? 0;
+  const unreadCount   = unreadData?.data ?? 0;
+
+  const start      = (currentPage - 1) * PAGE_SIZE + 1;
+  const end        = Math.min(currentPage * PAGE_SIZE, totalElements);
+  const groupStart = Math.floor((currentPage - 1) / GROUP_SIZE) * GROUP_SIZE + 1;
+  const groupEnd   = Math.min(groupStart + GROUP_SIZE - 1, totalPages);
+  const pages      = Array.from({ length: groupEnd - groupStart + 1 }, (_, i) => groupStart + i);
+  const isFirstGroup = groupStart === 1;
+  const isLastGroup  = groupEnd === totalPages;
 
   function invalidate() {
     queryClient.invalidateQueries({ queryKey: getNotificationsKey() });
@@ -63,7 +76,7 @@ export function NotificationPage() {
   }
   function handleRead(notificationId: number) {
     queryClient.setQueryData(
-      getNotificationsKey({ page: 0, size: 20 }),
+      getNotificationsKey({ page: currentPage - 1, size: PAGE_SIZE }),
       (old: typeof data) => old ? {
         ...old,
         data: old.data ? {
@@ -84,11 +97,7 @@ export function NotificationPage() {
 
   return (
     <>
-      <AppSidebar label="홈">
-        <ContextNavItem to={ROUTES.HOME}          icon={<HomeIcon />}   label="개요" />
-        <ContextNavItem to={ROUTES.NOTIFICATIONS} icon={<NoticeIcon />} label="알림" isActive badge={unreadCount > 0 ? unreadCount : undefined} />
-        <ContextNavItem icon={<CalendarIcon />} label="내 일정" />
-      </AppSidebar>
+      <DashboardSidebar isAdmin={getRole() === "관리자"} />
 
       <main className={layout.main}>
         <div className={s.pageHeader}>
@@ -114,6 +123,20 @@ export function NotificationPage() {
               {items.map((item) => (
                 <NotificationItem key={item.notificationId} item={item} onRead={handleRead} />
               ))}
+            </div>
+          )}
+          {totalPages > 1 && (
+            <div className={s.pagination}>
+              <span className={s.pageInfo}>{start.toLocaleString()}–{end.toLocaleString()} / {totalElements.toLocaleString()}건</span>
+              <div className={s.pageButtons}>
+                <button type="button" className={isFirstGroup ? s.pageBtnDisabled : s.pageBtn} onClick={() => setCurrentPage(1)} disabled={isFirstGroup}>«</button>
+                <button type="button" className={isFirstGroup ? s.pageBtnDisabled : s.pageBtn} onClick={() => setCurrentPage(groupStart - GROUP_SIZE)} disabled={isFirstGroup}>‹</button>
+                {pages.map((pg) => (
+                  <button key={pg} type="button" className={pg === currentPage ? s.pageBtnActive : s.pageBtn} onClick={() => setCurrentPage(pg)}>{pg}</button>
+                ))}
+                <button type="button" className={isLastGroup ? s.pageBtnDisabled : s.pageBtn} onClick={() => setCurrentPage(groupStart + GROUP_SIZE)} disabled={isLastGroup}>›</button>
+                <button type="button" className={isLastGroup ? s.pageBtnDisabled : s.pageBtn} onClick={() => setCurrentPage(totalPages)} disabled={isLastGroup}>»</button>
+              </div>
             </div>
           )}
         </div>
