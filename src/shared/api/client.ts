@@ -58,7 +58,7 @@ const kyInstance = ky.create({
 					setAccessToken(null)
 					// SSR 환경에서는 window 없음
 					if (typeof window !== "undefined") {
-						window.location.href = "/login"
+						window.location.href = "/"
 					}
 				}
 			},

@@ -8,7 +8,7 @@ export const Route = createFileRoute("/_app/admin-analysis-failed")({
     if (typeof window === 'undefined') return;
 
     if (getRole() !== "관리자") {
-      throw redirect({ to: ROUTES.HOME });
+      throw redirect({ to: ROUTES.EXCELLENT });
     }
   },
   component: AdminAnalysisFailedPage,

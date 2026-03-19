@@ -16,7 +16,7 @@ export function OAuthCallbackPage() {
       onSuccess: (data) => {
         if (data.accessToken) setAccessToken(data.accessToken);
         setRole(data.role);
-        navigate({ to: ROUTES.HOME });
+        navigate({ to: ROUTES.EXCELLENT });
       },
       onError: () => {
         navigate({ to: ROUTES.LOGIN });

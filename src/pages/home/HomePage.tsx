@@ -19,7 +19,7 @@ export function HomePage() {
   return (
     <>
       <AppSidebar label="홈">
-        <ContextNavItem to={ROUTES.HOME} icon={<HomeIcon />} label="개요" />
+        <ContextNavItem to={ROUTES.EXCELLENT} icon={<HomeIcon />} label="개요" />
         <ContextNavItem to={ROUTES.NOTIFICATIONS} icon={<NoticeIcon />} label="알림" badge={unreadCount > 0 ? unreadCount : undefined} />
 
       </AppSidebar>

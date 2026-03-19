@@ -1,4 +1,4 @@
-import { keyframes, style } from "@vanilla-extract/css";
+import { globalStyle, keyframes, style } from "@vanilla-extract/css";
 import { vars } from "../../../shared/design";
 
 export const pageHeader    = style({ padding: `${vars.spacing["8"]} ${vars.spacing["8"]} 0`, flexShrink: 0 });
@@ -6,9 +6,24 @@ export const pageHeaderRow = style({ display: "flex", alignItems: "center", just
 export const headerTitle   = style({ fontSize: vars.fontSize["2xl"], fontWeight: vars.fontWeight.bold, color: vars.color.textPrimary, letterSpacing: "-0.4px", margin: 0 });
 export const headerSubtitle = style({ fontSize: vars.fontSize.xs, color: vars.color.textSecondary, marginTop: "5px" });
 
-export const filterRow   = style({ display: "flex", gap: vars.spacing["3"], marginTop: vars.spacing["4"] });
+export const filterCard  = style({ backgroundColor: vars.color.surface, border: `1px solid ${vars.color.border}`, borderRadius: vars.radius.lg, padding: vars.spacing["3"], boxShadow: vars.shadow.sm, marginTop: vars.spacing["3"], marginLeft: vars.spacing["8"], marginRight: vars.spacing["3"], width: "fit-content" });
+
+globalStyle(`${filterCard} button[type="button"]`, {
+	height: "auto",
+	padding: `${vars.spacing["2"]} ${vars.spacing["3"]}`,
+	fontSize: vars.fontSize.sm,
+});
+export const filterRow   = style({ display: "flex", gap: vars.spacing["3"], alignItems: "center" });
 export const searchInput = style({ flex: 1, maxWidth: "300px", padding: `${vars.spacing["2"]} ${vars.spacing["3"]}`, border: `1px solid ${vars.color.border}`, borderRadius: vars.radius.md, fontSize: vars.fontSize.sm, color: vars.color.textPrimary, outline: "none", ":focus": { borderColor: vars.color.primary } });
-export const filterSelect = style({ padding: `${vars.spacing["2"]} ${vars.spacing["3"]}`, border: `1px solid ${vars.color.border}`, borderRadius: vars.radius.md, fontSize: vars.fontSize.sm, color: vars.color.textPrimary, backgroundColor: vars.color.surface, cursor: "pointer" });
+
+export const dropdownWrapper = style({ position: "relative", display: "inline-block", flexShrink: 0 });
+export const dropdownTrigger = style({ display: "inline-flex", alignItems: "center", gap: vars.spacing["1"], padding: `${vars.spacing["2"]} ${vars.spacing["3"]}`, border: `1px solid ${vars.color.border}`, borderRadius: vars.radius.md, fontSize: vars.fontSize.sm, color: vars.color.textPrimary, backgroundColor: vars.color.surface, cursor: "pointer", whiteSpace: "nowrap", fontFamily: "inherit", transition: `border-color 150ms ease, background-color 150ms ease`, selectors: { "&:hover": { borderColor: vars.color.textSecondary } } });
+export const dropdownTriggerActive = style({ borderColor: vars.color.primary, color: vars.color.primary, backgroundColor: "#EFF6FF", selectors: { "&:hover": { borderColor: vars.color.primary } } });
+export const dropdownChevron = style({ fontSize: "9px", color: "inherit", transition: `transform 150ms ease` });
+export const dropdownChevronOpen = style({ transform: "rotate(180deg)" });
+export const dropdownMenu = style({ position: "absolute", top: "calc(100% + 4px)", left: 0, minWidth: "100%", backgroundColor: vars.color.surface, border: `1px solid ${vars.color.border}`, borderRadius: vars.radius.md, boxShadow: vars.shadow.md, zIndex: 50, overflow: "hidden", padding: `${vars.spacing["1"]} 0` });
+export const dropdownItem = style({ display: "block", width: "100%", padding: `${vars.spacing["2"]} ${vars.spacing["3"]}`, fontSize: vars.fontSize.sm, color: vars.color.textPrimary, backgroundColor: "transparent", border: "none", cursor: "pointer", textAlign: "left", fontFamily: "inherit", whiteSpace: "nowrap", selectors: { "&:hover": { backgroundColor: "#F3F4F6" } } });
+export const dropdownItemActive = style({ color: vars.color.primary, fontWeight: vars.fontWeight.medium, backgroundColor: "#EFF6FF", selectors: { "&:hover": { backgroundColor: "#DBEAFE" } } });
 
 export const content = style({ flex: 1, padding: vars.spacing["6"], paddingLeft: vars.spacing["8"], paddingRight: vars.spacing["8"], overflowY: "auto", display: "flex", flexDirection: "column", gap: vars.spacing["4"] });
 

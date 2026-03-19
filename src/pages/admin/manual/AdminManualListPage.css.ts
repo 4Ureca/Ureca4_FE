@@ -55,23 +55,20 @@ export const content = style({
 export const searchCard = style({
 	display: "flex",
 	flexDirection: "column",
-	gap: vars.spacing["4"],
+	gap: vars.spacing["2"],
 	backgroundColor: vars.color.surface,
 	border: `1px solid ${vars.color.border}`,
 	borderRadius: vars.radius.lg,
-	padding: vars.spacing["5"],
+	padding: vars.spacing["3"],
+	width: "50%",
 });
 
 export const searchGrid = style({
 	display: "grid",
-	gridTemplateColumns:
-		"minmax(220px, 2fr) minmax(160px, 1fr) minmax(280px, 2fr) auto auto",
+	gridTemplateColumns: "minmax(220px, 2fr) minmax(160px, 1fr) minmax(280px, 2fr)",
 	gap: vars.spacing["3"],
 	alignItems: "end",
 	"@media": {
-		"screen and (max-width: 1200px)": {
-			gridTemplateColumns: "repeat(2, minmax(220px, 1fr)) auto auto",
-		},
 		"screen and (max-width: 800px)": {
 			gridTemplateColumns: "1fr",
 		},
@@ -93,7 +90,6 @@ export const searchLabel = style({
 
 const inputBase = style({
 	width: "100%",
-	height: "42px",
 	padding: `${vars.spacing["2"]} ${vars.spacing["3"]}`,
 	border: `1px solid ${vars.color.border}`,
 	borderRadius: vars.radius.md,
@@ -113,6 +109,15 @@ const inputBase = style({
 
 export const searchInput = style([inputBase]);
 export const searchSelect = style([inputBase, { cursor: "pointer" }]);
+
+export const dropdownWrapper = style({ position: "relative", display: "inline-block", width: "100%" });
+export const dropdownTrigger = style({ display: "inline-flex", alignItems: "center", justifyContent: "space-between", width: "100%", gap: vars.spacing["1"], padding: `${vars.spacing["2"]} ${vars.spacing["3"]}`, border: `1px solid ${vars.color.border}`, borderRadius: vars.radius.md, fontSize: vars.fontSize.sm, color: vars.color.textPrimary, backgroundColor: vars.color.surface, cursor: "pointer", whiteSpace: "nowrap", fontFamily: "inherit", transition: `border-color 150ms ease, background-color 150ms ease`, selectors: { "&:hover": { borderColor: vars.color.textSecondary } } });
+export const dropdownTriggerActive = style({ borderColor: vars.color.primary, color: vars.color.primary, backgroundColor: "#EFF6FF", selectors: { "&:hover": { borderColor: vars.color.primary } } });
+export const dropdownChevron = style({ fontSize: "9px", color: "inherit", transition: `transform 150ms ease` });
+export const dropdownChevronOpen = style({ transform: "rotate(180deg)" });
+export const dropdownMenu = style({ position: "absolute", top: "calc(100% + 4px)", left: 0, minWidth: "100%", backgroundColor: vars.color.surface, border: `1px solid ${vars.color.border}`, borderRadius: vars.radius.md, boxShadow: vars.shadow.md, zIndex: 50, overflow: "hidden", padding: `${vars.spacing["1"]} 0` });
+export const dropdownItem = style({ display: "block", width: "100%", padding: `${vars.spacing["2"]} ${vars.spacing["3"]}`, fontSize: vars.fontSize.sm, color: vars.color.textPrimary, backgroundColor: "transparent", border: "none", cursor: "pointer", textAlign: "left", fontFamily: "inherit", whiteSpace: "nowrap", selectors: { "&:hover": { backgroundColor: "#F3F4F6" } } });
+export const dropdownItemActive = style({ color: vars.color.primary, fontWeight: vars.fontWeight.medium, backgroundColor: "#EFF6FF", selectors: { "&:hover": { backgroundColor: "#DBEAFE" } } });
 
 export const searchButtonWrap = style({
 	display: "flex",
@@ -136,6 +141,18 @@ export const searchMetaRow = style({
 	alignItems: "center",
 	gap: vars.spacing["3"],
 	flexWrap: "wrap",
+	marginTop: 0,
+});
+
+export const searchMetaButtons = style({
+	display: "flex",
+	gap: vars.spacing["2"],
+});
+
+globalStyle(`${searchMetaButtons} button`, {
+	height: "32px",
+	padding: `0 ${vars.spacing["3"]}`,
+	fontSize: vars.fontSize.sm,
 });
 
 export const totalCount = style({

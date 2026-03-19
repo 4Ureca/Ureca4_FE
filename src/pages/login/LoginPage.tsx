@@ -23,7 +23,7 @@ export function LoginPage() {
       onSuccess: (data) => {
         if (data.accessToken) setAccessToken(data.accessToken);
         setRole(data.role);
-        navigate({ to: ROUTES.HOME });
+        navigate({ to: ROUTES.EXCELLENT });
       },
       onError: () => {
         setError("아이디 또는 비밀번호가 올바르지 않습니다.");

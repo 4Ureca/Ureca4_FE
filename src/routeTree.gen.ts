@@ -10,9 +10,8 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as OauthRouteImport } from './routes/oauth'
-import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
-import { Route as AppIndexRouteImport } from './routes/_app/index'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppNotificationsRouteImport } from './routes/_app/notifications'
 import { Route as AppNoticeRouteImport } from './routes/_app/notice'
 import { Route as AppMypageRouteImport } from './routes/_app/mypage'
@@ -37,19 +36,14 @@ const OauthRoute = OauthRouteImport.update({
   path: '/oauth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AppRoute = AppRouteImport.update({
   id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppIndexRoute = AppIndexRouteImport.update({
+const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AppNotificationsRoute = AppNotificationsRouteImport.update({
   id: '/notifications',
@@ -146,8 +140,7 @@ const AppConsultAdminManualSettingsRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof AppIndexRoute
-  '/login': typeof LoginRoute
+  '/': typeof IndexRoute
   '/oauth': typeof OauthRoute
   '/admin-analysis-failed': typeof AppAdminAnalysisFailedRoute
   '/admin-employees': typeof AppAdminEmployeesRoute
@@ -168,9 +161,8 @@ export interface FileRoutesByFullPath {
   '/summary': typeof AppConsultSummaryRoute
 }
 export interface FileRoutesByTo {
-  '/login': typeof LoginRoute
+  '/': typeof IndexRoute
   '/oauth': typeof OauthRoute
-  '/': typeof AppIndexRoute
   '/admin-analysis-failed': typeof AppAdminAnalysisFailedRoute
   '/admin-employees': typeof AppAdminEmployeesRoute
   '/admin-excellent-cases': typeof AppAdminExcellentCasesRoute
@@ -191,8 +183,8 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
-  '/login': typeof LoginRoute
   '/oauth': typeof OauthRoute
   '/_app/_consult': typeof AppConsultRouteWithChildren
   '/_app/admin-analysis-failed': typeof AppAdminAnalysisFailedRoute
@@ -204,7 +196,6 @@ export interface FileRoutesById {
   '/_app/mypage': typeof AppMypageRoute
   '/_app/notice': typeof AppNoticeRoute
   '/_app/notifications': typeof AppNotificationsRoute
-  '/_app/': typeof AppIndexRoute
   '/_app/_consult/admin-manual-settings': typeof AppConsultAdminManualSettingsRoute
   '/_app/_consult/admin-report': typeof AppConsultAdminReportRoute
   '/_app/_consult/analysis': typeof AppConsultAnalysisRoute
@@ -218,7 +209,6 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/login'
     | '/oauth'
     | '/admin-analysis-failed'
     | '/admin-employees'
@@ -239,9 +229,8 @@ export interface FileRouteTypes {
     | '/summary'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/login'
-    | '/oauth'
     | '/'
+    | '/oauth'
     | '/admin-analysis-failed'
     | '/admin-employees'
     | '/admin-excellent-cases'
@@ -261,8 +250,8 @@ export interface FileRouteTypes {
     | '/summary'
   id:
     | '__root__'
+    | '/'
     | '/_app'
-    | '/login'
     | '/oauth'
     | '/_app/_consult'
     | '/_app/admin-analysis-failed'
@@ -274,7 +263,6 @@ export interface FileRouteTypes {
     | '/_app/mypage'
     | '/_app/notice'
     | '/_app/notifications'
-    | '/_app/'
     | '/_app/_consult/admin-manual-settings'
     | '/_app/_consult/admin-report'
     | '/_app/_consult/analysis'
@@ -286,8 +274,8 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
-  LoginRoute: typeof LoginRoute
   OauthRoute: typeof OauthRoute
 }
 
@@ -300,13 +288,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OauthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_app': {
       id: '/_app'
       path: ''
@@ -314,12 +295,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_app/': {
-      id: '/_app/'
+    '/': {
+      id: '/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof AppIndexRouteImport
-      parentRoute: typeof AppRoute
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_app/notifications': {
       id: '/_app/notifications'
@@ -487,7 +468,6 @@ interface AppRouteChildren {
   AppMypageRoute: typeof AppMypageRoute
   AppNoticeRoute: typeof AppNoticeRoute
   AppNotificationsRoute: typeof AppNotificationsRoute
-  AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -501,14 +481,13 @@ const AppRouteChildren: AppRouteChildren = {
   AppMypageRoute: AppMypageRoute,
   AppNoticeRoute: AppNoticeRoute,
   AppNotificationsRoute: AppNotificationsRoute,
-  AppIndexRoute: AppIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
-  LoginRoute: LoginRoute,
   OauthRoute: OauthRoute,
 }
 export const routeTree = rootRouteImport

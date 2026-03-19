@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { keepPreviousData, useQueryClient } from "@tanstack/react-query";
 import Select from "react-select";
 import { useGetCandidatesQuery, useMutationPatchRejectExcellentCaseQuery } from "../../../shared/api/generated/admin-excellent-case";
@@ -155,6 +155,57 @@ function getCurrentISOWeek() {
   const yearStart = new Date(d.getFullYear(), 0, 1);
   const week = Math.ceil((((d.valueOf() - yearStart.valueOf()) / 86400000) + 1) / 7);
   return { year: d.getFullYear(), week };
+}
+
+function DropdownFilter({
+  value,
+  options,
+  onChange,
+}: {
+  value: string;
+  options: { label: string; value: string }[];
+  onChange: (v: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
+
+  const label = options.find((o) => o.value === value)?.label ?? value;
+
+  return (
+    <div className={s.dropdownWrapper} ref={ref}>
+      <button
+        type="button"
+        className={s.dropdownTrigger}
+        onClick={() => setOpen((o) => !o)}
+      >
+        {label}
+        <span className={`${s.dropdownChevron}${open ? ` ${s.dropdownChevronOpen}` : ""}`}>▼</span>
+      </button>
+      {open && (
+        <div className={s.dropdownMenu}>
+          {options.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              className={`${s.dropdownItem}${value === opt.value ? ` ${s.dropdownItemActive}` : ""}`}
+              onClick={() => { onChange(opt.value); setOpen(false); }}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function AdminExcellentCasesPage() {
@@ -409,18 +460,22 @@ export function AdminExcellentCasesPage() {
             </div>
 
             <div className={s.toolbarRight}>
-              <select className={s.filterSelect} value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-                <option value="">최신순</option>
-                <option value="score">점수순</option>
-              </select>
-              <select
-                className={s.filterSelect}
+              <DropdownFilter
+                value={sortBy}
+                options={[
+                  { label: "최신순", value: "" },
+                  { label: "점수순", value: "score" },
+                ]}
+                onChange={setSortBy}
+              />
+              <DropdownFilter
                 value={direction}
-                onChange={(e) => setDirection(e.target.value as any)}
-              >
-                <option value={GetCandidatesDirection.desc}>내림차순</option>
-                <option value={GetCandidatesDirection.asc}>오름차순</option>
-              </select>
+                options={[
+                  { label: "내림차순", value: GetCandidatesDirection.desc },
+                  { label: "오름차순", value: GetCandidatesDirection.asc },
+                ]}
+                onChange={(v) => setDirection(v as typeof direction)}
+              />
             </div>
           </div>
 

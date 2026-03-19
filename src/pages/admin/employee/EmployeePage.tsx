@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
 	useGetEmployeesQuery,
 	useMutationPatchEmployeeStatusQuery,
@@ -24,6 +24,59 @@ import { EmployeeTable } from "./EmployeeTable";
 
 const PAGE_SIZE = 10;
 const GROUP_SIZE = 5;
+
+const STATUS_OPTIONS = ["활성화", "비활성화"];
+
+function StatusDropdown({
+	value,
+	onChange,
+}: {
+	value: string;
+	onChange: (v: string) => void;
+}) {
+	const [open, setOpen] = useState(false);
+	const ref = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		if (!open) return;
+		function handleClickOutside(e: MouseEvent) {
+			if (ref.current && !ref.current.contains(e.target as Node)) {
+				setOpen(false);
+			}
+		}
+		document.addEventListener("mousedown", handleClickOutside);
+		return () => document.removeEventListener("mousedown", handleClickOutside);
+	}, [open]);
+
+	const isActive = value !== "전체";
+
+	return (
+		<div className={s.dropdownWrapper} ref={ref}>
+			<button
+				type="button"
+				className={`${s.dropdownTrigger}${isActive ? ` ${s.dropdownTriggerActive}` : ""}`}
+				onClick={() => setOpen((o) => !o)}
+			>
+				{value}
+				<span className={`${s.dropdownChevron}${open ? ` ${s.dropdownChevronOpen}` : ""}`}>▼</span>
+			</button>
+			{open && (
+				<div className={s.dropdownMenu}>
+					{["전체", ...STATUS_OPTIONS].map((opt) => (
+						<button
+							key={opt}
+							type="button"
+							className={`${s.dropdownItem}${value === opt ? ` ${s.dropdownItemActive}` : ""}`}
+							onClick={() => { onChange(opt); setOpen(false); }}
+						>
+							{opt}
+						</button>
+					))}
+				</div>
+			)}
+		</div>
+	);
+}
 
 export function EmployeePage() {
 	const [page, setPage] = useState(1);
@@ -129,14 +182,9 @@ export function EmployeePage() {
 								직원 계정을 생성하고 관리합니다.
 							</p>
 						</div>
-						<Button
-							variant="primary"
-							type="button"
-							onClick={() => setShowCreate(true)}
-						>
-							직원 추가
-						</Button>
 					</div>
+					</div>
+				<div className={s.filterCard}>
 					<div className={s.filterRow}>
 						<input
 							className={s.searchInput}
@@ -147,18 +195,17 @@ export function EmployeePage() {
 								setPage(1);
 							}}
 						/>
-						<select
-							className={s.filterSelect}
+						<StatusDropdown
 							value={status}
-							onChange={(e) => {
-								setStatus(e.target.value);
-								setPage(1);
-							}}
+							onChange={(v) => { setStatus(v); setPage(1); }}
+						/>
+						<Button
+							variant="primary"
+							type="button"
+							onClick={() => setShowCreate(true)}
 						>
-							<option value="전체">전체</option>
-							<option value="활성화">활성화</option>
-							<option value="비활성화">비활성화</option>
-						</select>
+							직원 추가
+						</Button>
 					</div>
 				</div>
 

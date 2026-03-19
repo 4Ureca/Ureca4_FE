@@ -1,4 +1,4 @@
-import { type FormEvent, useId } from "react";
+import { type FormEvent, useEffect, useId, useRef, useState } from "react";
 import { Button } from "../../../shared/ui/Button/Button";
 import * as layout from "../../../shared/ui/pageLayout.css";
 import { AdminSidebar } from "../../../widgets/AdminSidebar/AdminSidebar";
@@ -8,9 +8,59 @@ import { AdminManualModal } from "./AdminManualModal";
 import { AdminManualTable } from "./AdminManualTable";
 import { useAdminManualManagement } from "./useAdminManualManagement";
 
+const STATUS_OPTIONS = ["활성화", "비활성화"];
+
+function StatusDropdown({
+	value,
+	onChange,
+}: {
+	value: string;
+	onChange: (v: string) => void;
+}) {
+	const [open, setOpen] = useState(false);
+	const ref = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		if (!open) return;
+		function handleClickOutside(e: MouseEvent) {
+			if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+		}
+		document.addEventListener("mousedown", handleClickOutside);
+		return () => document.removeEventListener("mousedown", handleClickOutside);
+	}, [open]);
+
+	const isActive = value !== "전체";
+
+	return (
+		<div className={s.dropdownWrapper} ref={ref}>
+			<button
+				type="button"
+				className={`${s.dropdownTrigger}${isActive ? ` ${s.dropdownTriggerActive}` : ""}`}
+				onClick={() => setOpen((o) => !o)}
+			>
+				{value}
+				<span className={`${s.dropdownChevron}${open ? ` ${s.dropdownChevronOpen}` : ""}`}>▼</span>
+			</button>
+			{open && (
+				<div className={s.dropdownMenu}>
+					{["전체", ...STATUS_OPTIONS].map((opt) => (
+						<button
+							key={opt}
+							type="button"
+							className={`${s.dropdownItem}${value === opt ? ` ${s.dropdownItemActive}` : ""}`}
+							onClick={() => { onChange(opt); setOpen(false); }}
+						>
+							{opt}
+						</button>
+					))}
+				</div>
+			)}
+		</div>
+	);
+}
+
 export function AdminManualListPage() {
 	const categoryFilterId = useId();
-	const statusFilterId = useId();
 	const keywordFilterId = useId();
 
 	const {
@@ -77,24 +127,13 @@ export function AdminManualListPage() {
 								</div>
 
 								<div className={s.searchField}>
-									<label className={s.searchLabel} htmlFor={statusFilterId}>
+									<span className={s.searchLabel}>
 										상태
-									</label>
-									<select
-										id={statusFilterId}
-										className={s.searchSelect}
-										value={draftFilters.status}
-										onChange={(event) =>
-											updateDraftFilter(
-												"status",
-												event.target.value as typeof draftFilters.status,
-											)
-										}
-									>
-										<option value="전체">전체</option>
-										<option value="활성화">활성화</option>
-										<option value="비활성화">비활성화</option>
-									</select>
+									</span>
+									<StatusDropdown
+										value={draftFilters.status ?? "전체"}
+										onChange={(v) => updateDraftFilter("status", v as typeof draftFilters.status)}
+									/>
 								</div>
 
 								<div className={s.searchField}>
@@ -113,28 +152,24 @@ export function AdminManualListPage() {
 									/>
 								</div>
 
-								<div className={s.searchButtonWrap}>
-									<Button type="submit" className={s.searchActionButton}>
-										검색
-									</Button>
-								</div>
-
-								<div className={s.searchButtonWrap}>
-									<Button
-										type="button"
-										variant="secondary"
-										className={s.searchActionButton}
-										onClick={openCreateModal}
-									>
-										신규 등록
-									</Button>
-								</div>
 							</div>
 
 							<div className={s.searchMetaRow}>
 								<span className={s.totalCount}>
 									총 {totalElements.toLocaleString()}건
 								</span>
+								<div className={s.searchMetaButtons}>
+									<Button type="submit">
+										검색
+									</Button>
+									<Button
+										type="button"
+										variant="secondary"
+										onClick={openCreateModal}
+									>
+										신규 등록
+									</Button>
+								</div>
 							</div>
 						</form>
 
