@@ -16,7 +16,7 @@ export const getSummaryList = (params?: ListParams, signal?: AbortSignal) => {
 
 export const getSummaryDetail = (consultId: number, signal?: AbortSignal) => {
 	return apiClient<ConsultationSummaryDetailResponse>({
-		url: `/summaries/${consultId}`,
+		url: `/api/summaries/${consultId}`,
 		method: "GET",
 		signal,
 	});
