@@ -39,7 +39,7 @@ const kyInstance = ky.create({
 		],
 		afterResponse: [
 			async (request, _options, response) => {
-				if (response.status !== 401) return response
+				if (response.status !== 401 && response.status !== 403) return response
 
 				// 인증 엔드포인트 자체가 401이면 갱신 시도하지 않음
 				if (
