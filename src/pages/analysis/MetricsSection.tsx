@@ -35,7 +35,7 @@ export function MetricsSection({ metrics, isPending }: Props) {
       {metrics.iamMatchRate != null && (
         <div className={s.durationRow}>
           <span className={s.durationLabel}>IAM 일치율</span>
-          <span className={s.durationValue} style={{ marginLeft: "8px" }}>{metrics.iamMatchRate.toFixed(1)}%</span>
+          <span className={s.durationValue} style={{ marginLeft: "8px" }}>{(metrics.iamMatchRate * 100).toFixed(1)}%</span>
         </div>
       )}
     </div>

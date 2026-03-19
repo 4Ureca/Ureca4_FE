@@ -19,11 +19,12 @@ export const content = style({
   display: "flex",
   flexDirection: "column",
   gap: vars.spacing["4"],
+  justifyContent: "center",
 });
 
 /* ─── Table ─── */
 
-export const tableCard = style({ backgroundColor: vars.color.surface, borderRadius: vars.radius.lg, boxShadow: vars.shadow.sm, overflow: "hidden" });
+export const tableCard = style({ backgroundColor: vars.color.surface, borderRadius: vars.radius.lg, boxShadow: vars.shadow.sm, overflow: "hidden", width: "80%", marginLeft: "auto", marginRight: "auto" });
 export const table     = style({ width: "100%", borderCollapse: "collapse" });
 export const thead     = style({ borderBottom: `2px solid ${vars.color.border}` });
 
@@ -46,6 +47,7 @@ export const tr = style({
 
 export const td          = style({ padding: `${vars.spacing["4"]} ${vars.spacing["4"]}`, fontSize: vars.fontSize.sm, color: vars.color.textPrimary, verticalAlign: "middle" });
 export const tdSecondary = style([td, { color: vars.color.textSecondary }]);
+export const tdDate      = style([td, { color: vars.color.textSecondary, whiteSpace: "nowrap", width: "1%", minWidth: "90px" }]);
 
 export const titleCell = style({ display: "flex", alignItems: "center", gap: vars.spacing["2"], maxWidth: "420px" });
 export const titleText = style({ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: vars.fontSize.sm, color: vars.color.textPrimary, fontWeight: vars.fontWeight.medium });

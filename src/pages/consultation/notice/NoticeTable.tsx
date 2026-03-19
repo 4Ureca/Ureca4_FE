@@ -100,7 +100,7 @@ export function NoticeTable({ items, onRowClick, isAdmin, myName, onEdit, onDele
                 </td>
                 <td className={s.tdSecondary}>{item.authorName ?? "-"}</td>
                 <td className={s.tdSecondary}>{(item.viewCount ?? 0).toLocaleString()}</td>
-                <td className={s.tdSecondary}>{formatDate(item.createdAt)}</td>
+                <td className={s.tdDate}>{formatDate(item.createdAt)}</td>
                 {isAdmin && myName && (
                   <td className={s.td} style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
                     {item.authorName === myName && (
