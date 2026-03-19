@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import Select from "react-select";
 import { useGetCandidatesQuery, useMutationPatchRejectExcellentCaseQuery } from "../../../shared/api/generated/admin-excellent-case";
 import {
   useGetAgentsQuery,
@@ -332,19 +333,71 @@ export function AdminExcellentCasesPage() {
                 />
               </div>
 
-              <select className={s.filterSelect} value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
-                <option value="">카테고리 전체</option>
-                {uniqueSmallCategories.map(c => (
-                  <option key={c.categoryCode} value={c.smallCategory}>{c.smallCategory}</option>
-                ))}
-              </select>
+              <Select
+                options={uniqueSmallCategories.map((c) => ({ value: c.smallCategory ?? "", label: c.smallCategory ?? "" }))}
+                value={categoryFilter ? { value: categoryFilter, label: categoryFilter } : null}
+                onChange={(opt) => { setCategoryFilter(opt?.value ?? ""); setPage(1); }}
+                isClearable
+                placeholder="카테고리 검색..."
+                noOptionsMessage={() => "검색 결과 없음"}
+                styles={{
+                  container: (base) => ({ ...base, minWidth: 180 }),
+                  control: (base, state) => ({
+                    ...base,
+                    minHeight: 36,
+                    height: 36,
+                    borderColor: state.isFocused ? "#E1006A" : "#D1D5DB",
+                    borderRadius: "8px",
+                    boxShadow: "none",
+                    fontSize: "14px",
+                    backgroundColor: "#FFFFFF",
+                    cursor: "text",
+                    ":hover": { borderColor: state.isFocused ? "#E1006A" : "#D1D5DB" },
+                  }),
+                  valueContainer: (base) => ({ ...base, padding: "0 8px" }),
+                  input: (base) => ({ ...base, margin: 0, padding: 0, color: "#111827" }),
+                  placeholder: (base) => ({ ...base, color: "#6B7280", fontSize: "14px" }),
+                  singleValue: (base) => ({ ...base, color: "#374151", fontSize: "14px" }),
+                  menu: (base) => ({ ...base, borderRadius: "8px", border: "1px solid #D1D5DB", boxShadow: "0 4px 6px rgba(0,0,0,0.07)", zIndex: 50 }),
+                  option: (base, state) => ({ ...base, fontSize: "14px", backgroundColor: state.isSelected ? "#E1006A" : state.isFocused ? "#F9FAFB" : "#FFFFFF", color: state.isSelected ? "#FFFFFF" : "#111827", cursor: "pointer" }),
+                  indicatorSeparator: () => ({ display: "none" }),
+                  dropdownIndicator: (base) => ({ ...base, padding: "0 6px", color: "#6B7280" }),
+                  clearIndicator: (base) => ({ ...base, padding: "0 4px", color: "#6B7280" }),
+                }}
+              />
 
-              <select className={s.filterSelect} value={agentFilter} onChange={(e) => setAgentFilter(e.target.value)}>
-                <option value="">상담사 전체</option>
-                {agents.map(a => (
-                  <option key={a.empId} value={a.name}>{a.name}</option>
-                ))}
-              </select>
+              <Select
+                options={agents.map((a) => ({ value: a.name ?? "", label: a.name ?? "" }))}
+                value={agentFilter ? { value: agentFilter, label: agentFilter } : null}
+                onChange={(opt) => { setAgentFilter(opt?.value ?? ""); setPage(1); }}
+                isClearable
+                placeholder="상담사 검색..."
+                noOptionsMessage={() => "검색 결과 없음"}
+                styles={{
+                  container: (base) => ({ ...base, minWidth: 180 }),
+                  control: (base, state) => ({
+                    ...base,
+                    minHeight: 36,
+                    height: 36,
+                    borderColor: state.isFocused ? "#E1006A" : "#D1D5DB",
+                    borderRadius: "8px",
+                    boxShadow: "none",
+                    fontSize: "14px",
+                    backgroundColor: "#FFFFFF",
+                    cursor: "text",
+                    ":hover": { borderColor: state.isFocused ? "#E1006A" : "#D1D5DB" },
+                  }),
+                  valueContainer: (base) => ({ ...base, padding: "0 8px" }),
+                  input: (base) => ({ ...base, margin: 0, padding: 0, color: "#111827" }),
+                  placeholder: (base) => ({ ...base, color: "#6B7280", fontSize: "14px" }),
+                  singleValue: (base) => ({ ...base, color: "#374151", fontSize: "14px" }),
+                  menu: (base) => ({ ...base, borderRadius: "8px", border: "1px solid #D1D5DB", boxShadow: "0 4px 6px rgba(0,0,0,0.07)", zIndex: 50 }),
+                  option: (base, state) => ({ ...base, fontSize: "14px", backgroundColor: state.isSelected ? "#E1006A" : state.isFocused ? "#F9FAFB" : "#FFFFFF", color: state.isSelected ? "#FFFFFF" : "#111827", cursor: "pointer" }),
+                  indicatorSeparator: () => ({ display: "none" }),
+                  dropdownIndicator: (base) => ({ ...base, padding: "0 6px", color: "#6B7280" }),
+                  clearIndicator: (base) => ({ ...base, padding: "0 4px", color: "#6B7280" }),
+                }}
+              />
             </div>
 
             <div className={s.toolbarRight}>
