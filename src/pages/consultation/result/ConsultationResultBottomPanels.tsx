@@ -122,7 +122,7 @@ function ConsultSearchPanel({ filterParams, filterName, onSelectSummary }: Consu
       <div className={s.searchRow}>
         <input
           className={s.searchInput}
-          placeholder={filterName ? `${filterName} 조건 적용됨` : "검색어 입력..."}
+          placeholder={filterName ? `${filterName} 조건 적용됨` : "고객 이름 입력..."}
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSearch()}
