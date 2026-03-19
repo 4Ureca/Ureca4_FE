@@ -28,19 +28,19 @@ export function ConsultationResultBookmarkDetail({ consultId, onClose }: Props) 
         {!isPending && !isError && detail && (
           <>
             {detail.consultationCreatedAt && (
-              <div>
+              <div className={s.bookmarkDetailFieldCard}>
                 <p className={s.bookmarkDetailLabel}>상담일시</p>
                 <p className={s.bookmarkDetailValue}>{detail.consultationCreatedAt.slice(0, 10)}</p>
               </div>
             )}
             {detail.summary && (
-              <div>
+              <div className={s.bookmarkDetailFieldCard}>
                 <p className={s.bookmarkDetailLabel}>요약</p>
                 <p className={s.bookmarkDetailValue}>{detail.summary}</p>
               </div>
             )}
             {detail.result && (
-              <div>
+              <div className={s.bookmarkDetailFieldCard}>
                 <p className={s.bookmarkDetailLabel}>처리 결과</p>
                 <p className={s.bookmarkDetailValue}>{detail.result}</p>
               </div>

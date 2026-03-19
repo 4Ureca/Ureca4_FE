@@ -3,7 +3,6 @@ import { ROUTES } from "../../shared/config/routes";
 import {
   AnalysisIcon,
   ConsultationIcon,
-  OnlineIndicator,
   SettingsIcon,
   UPlusLogoIcon,
 } from "../../shared/ui/icons";
@@ -30,10 +29,6 @@ export function AppTopbar() {
       </nav>
 
       <div className={s.topbarRight}>
-        <div className={s.statusBadge}>
-          <OnlineIndicator />
-          시스템 정상
-        </div>
         <UserDropdown />
       </div>
     </header>
