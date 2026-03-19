@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ROUTES } from "../../shared/config/routes";
 import { ContextNavItem } from "../../shared/ui/ContextNavItem";
 import { SidebarNavGroup } from "../../shared/ui/SidebarNavGroup";
-import { AnalysisIcon, BookmarkIcon, NoticeIcon, SettingsIcon } from "../../shared/ui/icons";
+import { AnalysisIcon, BookmarkIcon, MegaphoneIcon, SettingsIcon } from "../../shared/ui/icons";
 import * as layout from "../../shared/ui/pageLayout.css";
 import { AppSidebar } from "../AppSidebar/AppSidebar";
 
@@ -11,7 +11,7 @@ interface Props { isAdmin?: boolean; }
 export function DashboardSidebar({ isAdmin }: Props) {
   return (
     <AppSidebar label="대시보드">
-      <ContextNavItem icon={<NoticeIcon />} label="공지사항" to={ROUTES.NOTICE} />
+      <ContextNavItem icon={<MegaphoneIcon />} label="공지사항" to={ROUTES.NOTICE} />
       {isAdmin ? (
         <SidebarNavGroup icon={<AnalysisIcon />} label="우수사례">
           <Link
