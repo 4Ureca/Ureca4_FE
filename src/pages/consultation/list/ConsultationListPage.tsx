@@ -1,9 +1,8 @@
 import { useCallback, useState } from "react";
-import type { GetConsultationListParams } from "../../../shared/api/generated/api.schemas";
 import { useGetConsultationListQuery } from "../../../shared/api/generated/consultation-list";
 import * as layout from "../../../shared/ui/pageLayout.css";
 import { ConsultationDetailModal } from "./ConsultationDetailModal";
-import { ConsultationListFilter } from "./ConsultationListFilter";
+import { ConsultationListFilter, type ConsultationListFilterParams } from "./ConsultationListFilter";
 import * as s from "./ConsultationListPage.css";
 import { ConsultationListPagination } from "./ConsultationListPagination";
 import { ConsultationListTable } from "./ConsultationListTable";
@@ -12,7 +11,7 @@ const PAGE_SIZE = 20;
 const CLOSE_DELAY = 180;
 
 export function ConsultationListPage() {
-  const [params, setParams] = useState<GetConsultationListParams>({});
+  const [params, setParams] = useState<ConsultationListFilterParams>({});
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [isClosing, setIsClosing]   = useState(false);
 
@@ -23,7 +22,20 @@ export function ConsultationListPage() {
   const totalPages    = listData?.totalPages ?? 1;
   const currentPage   = (listData?.page ?? 0) + 1;
 
-  function handleFilterChange(updates: Partial<GetConsultationListParams>) {
+  const isFiltered = !!(
+    params.keyword ||
+    params.categoryLarge ||
+    params.resultStatus ||
+    params.summaryStatus ||
+    params.channel
+  );
+  const subtitleText = isPending
+    ? "불러오는 중..."
+    : isFiltered
+      ? `검색된 ${totalElements.toLocaleString()}건의 상담 내역`
+      : `전체 ${totalElements.toLocaleString()}건의 상담 내역`;
+
+  function handleFilterChange(updates: Partial<ConsultationListFilterParams>) {
     setParams((prev) => ({ ...prev, ...updates, page: undefined }));
   }
 
@@ -50,7 +62,7 @@ export function ConsultationListPage() {
         <div className={s.pageWrapper}>
           <div className={s.header}>
             <h1 className={s.title}>상담내역</h1>
-            <p className={s.subtitle}>전체 {totalElements.toLocaleString()}건의 상담 내역</p>
+            <p className={s.subtitle}>{subtitleText}</p>
           </div>
 
           <div className={s.content}>

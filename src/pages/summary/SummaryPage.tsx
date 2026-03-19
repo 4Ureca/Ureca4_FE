@@ -35,6 +35,15 @@ export function SummaryPage() {
   const totalElements = data?.totalElements ?? 0;
   const totalPages    = data?.totalPages ?? 1;
 
+  const isFiltered = Object.values(filterParams).some((v) =>
+    Array.isArray(v) ? v.length > 0 : v !== undefined && v !== null && v !== "",
+  );
+  const subtitleText = isPending
+    ? "불러오는 중..."
+    : isFiltered
+      ? `검색된 ${totalElements.toLocaleString()}건의 요약 내역`
+      : `전체 ${totalElements.toLocaleString()}건의 요약 내역`;
+
   const handleSearch = useCallback((newParams: Omit<ListParams, "page" | "size">) => {
     setFilterParams(newParams);
     setCurrentPage(1);
@@ -80,7 +89,7 @@ export function SummaryPage() {
           <div className={s.header}>
             <div className={s.headerLeft}>
               <h1 className={s.title}>상담요약</h1>
-              <p className={s.subtitle}>전체 {totalElements.toLocaleString()}건의 요약 내역</p>
+              <p className={s.subtitle}>{subtitleText}</p>
             </div>
             <button type="button" className={s.savedFiltersBtn} onClick={() => setShowSaved(true)}>
               ☆ 저장된 조건 목록
