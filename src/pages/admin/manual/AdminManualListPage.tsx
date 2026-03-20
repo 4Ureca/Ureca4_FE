@@ -155,9 +155,6 @@ export function AdminManualListPage() {
 							</div>
 
 							<div className={s.searchMetaRow}>
-								<span className={s.totalCount}>
-									총 {totalElements.toLocaleString()}건
-								</span>
 								<div className={s.searchMetaButtons}>
 									<Button type="submit">
 										검색
@@ -172,6 +169,9 @@ export function AdminManualListPage() {
 								</div>
 							</div>
 						</form>
+						<span className={s.totalCountRow}>
+							총 {totalElements.toLocaleString()}건
+						</span>
 
 						{categoriesError && (
 							<p className={s.stateText}>{categoriesError}</p>

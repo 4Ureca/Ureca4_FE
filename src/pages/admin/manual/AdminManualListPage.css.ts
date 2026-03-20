@@ -45,6 +45,7 @@ export const headerSubtitle = style({
 export const content = style({
 	display: "flex",
 	flexDirection: "column",
+	alignItems: "flex-start",
 	gap: vars.spacing["4"],
 	padding: vars.spacing["6"],
 	paddingLeft: vars.spacing["8"],
@@ -55,17 +56,18 @@ export const content = style({
 export const searchCard = style({
 	display: "flex",
 	flexDirection: "column",
-	gap: vars.spacing["2"],
+	alignSelf: "flex-start",
+	width: "fit-content",
+	gap: vars.spacing["1"],
 	backgroundColor: vars.color.surface,
 	border: `1px solid ${vars.color.border}`,
 	borderRadius: vars.radius.lg,
-	padding: vars.spacing["3"],
-	width: "50%",
+	padding: vars.spacing["2"],
 });
 
 export const searchGrid = style({
 	display: "grid",
-	gridTemplateColumns: "minmax(220px, 2fr) minmax(160px, 1fr) minmax(280px, 2fr)",
+	gridTemplateColumns: "240px 150px 300px",
 	gap: vars.spacing["3"],
 	alignItems: "end",
 	"@media": {
@@ -137,11 +139,15 @@ export const searchActionButton = style({
 
 export const searchMetaRow = style({
 	display: "flex",
-	justifyContent: "space-between",
+	justifyContent: "flex-end",
 	alignItems: "center",
-	gap: vars.spacing["3"],
-	flexWrap: "wrap",
-	marginTop: 0,
+	gap: vars.spacing["2"],
+});
+
+export const totalCountRow = style({
+	fontSize: vars.fontSize.xs,
+	color: vars.color.textSecondary,
+	paddingLeft: vars.spacing["1"],
 });
 
 export const searchMetaButtons = style({
@@ -168,6 +174,7 @@ export const stateText = style({
 });
 
 export const tableWrap = style({
+	width: "100%",
 	backgroundColor: vars.color.surface,
 	borderRadius: vars.radius.lg,
 	border: `1px solid ${vars.color.border}`,
@@ -333,6 +340,7 @@ export const detailButton = style({
 });
 
 export const paginationCard = style({
+	width: "100%",
 	backgroundColor: vars.color.surface,
 	borderRadius: vars.radius.lg,
 	border: `1px solid ${vars.color.border}`,

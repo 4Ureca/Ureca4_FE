@@ -19,7 +19,7 @@ interface SavedFiltersPanelProps {
 }
 
 function SavedFiltersPanel({ activeFilterId, onFilterSelect }: SavedFiltersPanelProps) {
-  const { data, isPending, isError } = useGetMyFilterGroupsQuery();
+  const { data, isPending, isError } = useGetMyFilterGroupsQuery({ query: { staleTime: 0, gcTime: 0 } });
   const groups = data ? Object.values(data).flat() : [];
 
   return (
@@ -166,9 +166,9 @@ export function ConsultationResultBottomPanels({ onSelectBookmark, onSelectSumma
   const filterParams = useMemo<ListParams>(() => {
     if (!filterDetail?.filters?.length) return {};
     return filterDetail.filters.reduce<Record<string, unknown>>((acc, f) => {
-      if (f.filterKey && f.filterValue !== undefined) {
-        acc[f.filterKey] = f.filterValue;
-      }
+      if (!f.filterKey || f.filterValue === undefined) return acc;
+      const key = f.filterKey === "category_name" ? "categoryMedium" : f.filterKey;
+      acc[key] = f.filterValue;
       return acc;
     }, {}) as ListParams;
   }, [filterDetail]);
